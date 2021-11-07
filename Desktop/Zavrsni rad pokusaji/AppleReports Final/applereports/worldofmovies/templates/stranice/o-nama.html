@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section id="aboutusbanner" class="py-5 text-white">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-md-12">
+          <h1 class="display-4">About Us</h1>
+          <p class="lead">Who is behind Apple Reports, why did we make a website dedicated to Apple? All your questions are answered here.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Breadcrumb -->
+  <section id="bc" class="mt-3">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'index' %}"><!--ime koje smo dali u metodi koja je odgovorna za učitavanje stranice-->
+              <i class="fas fa-home"></i> Home page</a>
+          </li>
+          <li class="breadcrumb-item active"> About us</li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+<!-- About us -->
+  <h2 style="text-align:center">Our Team</h2>
+<div class="row">
+  <div class="column2">
+    <div class="card">
+      <img src="../../static/img/Ekipa/anonymous.png" width="250px" class="about-us-img2" style="margin-left: 110px;" alt="Employee 1">
+      <div class="container">
+        <h2>Employee 1</h2>
+        <p class="title">CEO and Founder</p>
+        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Illum, dolores ullam, magni cumque quasi deleniti fuga tempore nostrum et dicta soluta temporibus blanditiis distinctio dolore! Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni qui ut temporibus voluptates soluta incidunt velit corrupti. Ipsum quisquam nobis pariatur.
+        </p>
+        <p>employee1@gmail.com</p>
+        <p><button class="button2">Contact</button></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="column2">
+    <div class="card">
+      <img src="../../static/img/Ekipa/anonymous.png" width="250px" class="about-us-img2" style="margin-left: 110px;" alt="Employee 2">
+      <div class="container2">
+        <h2>Employee 2</h2>
+        <p class="title">Chief Operating Officer</p>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis ipsum, dolorum, expedita impedit assumenda animi ea cumque neque minus repudiandae culpa quaerat fuga hic ratione aut dolore. Distinctio illum maiores natus amet, cumque iusto eius nemo voluptas totam sequi quibusdam deleniti praesentium ipsam dolorem architecto molestias</p>
+        <p>employee2@gmail.com</p>
+        <p><button class="button2">Contact</button></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="column2">
+    <div class="card">
+      <img src="../../static/img/Ekipa/anonymous.png" width="250px" class="about-us-img2" style="margin-left: 110px;" alt="Employee 3">
+      <div class="container2">
+        <h2>Employee 3</h2>
+        <p class="title">Chief Financial Officer</p>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minima officia impedit quod soluta laborum voluptates velit nam consequatur ullam quos laboriosam nisi, tenetur, ab tempora facilis eos modi, sequi aliquid alias sint neque et. Quibusdam sunt ut tempore voluptates laboriosam sint. Soluta, sit amet. Explicabo omnis et ipsa magni perferendis!
+        </p>
+        <p>employee3@gmail.com</p>
+        <p><button class="button2">Contact</button></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+{% endblock %}

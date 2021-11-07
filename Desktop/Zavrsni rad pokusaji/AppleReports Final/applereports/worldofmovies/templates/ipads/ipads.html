@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section id="ipadbanner" class="py-5 text-white">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-md-12">
+          <h1 class="display-4">Search for any iPad</h1>
+          <p class="lead">Take a look at different iPads, compare them and see which one fits you the best!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Breadcrumb -->
+  <section id="bc" class="mt-3">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'index' %}">
+              <i class="fas fa-home"></i> Home Page</a>
+          </li>
+          <li class="breadcrumb-item active"> Search iPads</li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Listings -->
+  <section id="listings" class="py-4">
+    <div class="container">
+      <div class="row">
+
+        {% if ipads %}
+            {% for ipad in ipads %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card listing-preview">
+                  <img class="card-img-top" src="{{ ipad.plakat.url }}" alt="">
+                  <div class="card-img-overlay">
+                    <!--<h2>
+                      <span class="badge badge-secondary text-white">{{ ipad.ocjena }}</span>
+                    </h2>-->
+                  </div>
+                  <div class="card-body">
+                    <div class="listing-heading text-center">
+                      <h4 class="text-primary">{{ ipad.name }}</h4>
+                      <p>
+                        <i class="fas fa-palette text-black"></i> {{ ipad.colors }}</p>
+                    </div>
+                    <hr>
+                    <div class="row py-2 text-black">
+                      <div class="col-6">
+                        <i class="fas fa-calendar"></i> {{ ipad.released }}</div>
+                      <div class="col-6">
+                        <i class="fa fa-tags"></i> {{ ipad.price }}</div>
+                    </div>
+                    <hr>
+                    <a href="{% url 'ipad' ipad.id %}" class="btn btn-primary btn-block">More</a>
+                  </div>
+                </div>
+              </div>
+            {% endfor%}
+        {% else %}
+            <div class="col-md-12">
+                <p>Nema dostupnih filmova</p>
+            </div>
+        {% endif %}
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          {% if ipads.has_other_pages %}
+          <ul class="pagination">
+            {% if ipads.has_previous %}
+              <li class="page-item">
+                <a href="?page={{ ipads.previous_page_number }}" class="page-link">&laquo;</a>
+              </li>
+            {% else %}
+            <li class="page-item disabled">
+              <a class="page-link">&laquo;</a>
+            </li>
+            {% endif %}
+
+            {% for i in ipads.paginator.page_range %}
+              {% if ipads.number == i%}
+                <li class="page-item active">
+                  <a class="page-link">{{i}}</a>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a href="?page={{i}}" class="page-link">{{i}}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if ipads.has_next %} 
+              <li class="page-item">
+                <a href="?page={{ ipads.next_page_number }}" class="page-link">&raquo;</a>
+              </li>
+            {% else %}
+            <li class="page-item disabled">
+              <a class="page-link">&raquo;</a>
+            </li>
+            {% endif %}
+
+          </ul>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}

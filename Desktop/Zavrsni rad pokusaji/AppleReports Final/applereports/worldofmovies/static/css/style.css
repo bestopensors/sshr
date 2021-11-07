@@ -1,0 +1,213 @@
+.btn-secondary {
+  color: #fff !important; }
+
+.logo {
+  width: 80px; }
+
+.navbar {
+  opacity: 0.9;
+  text-transform: uppercase; }
+
+.social a {
+  margin-right: 0.4rem; }
+
+.carousel-item{
+    width: 100%; 
+    height: 550px; 
+    overflow: hidden;
+}
+.carousel-item img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.carousel-caption{
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#showcase {
+  background: url(../img/showcase.jpg) no-repeat top center fixed;
+  background-size: cover;
+  position: relative;
+  min-height: 650px;
+  color: #fff;
+  padding-top: 6rem; }
+  #showcase .home-search {
+    min-height: 400px;
+    position: relative;
+    border-radius: 5px; }
+  #showcase .overlay {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-height: 400px;
+    width: 100%;
+    background: rgba(51, 51, 51, 0.8); }
+
+#services {
+  background: url(../img/Products/Misc/iphone_banner.jpg) no-repeat top center fixed;
+  background-size: cover;
+  min-height: 300px;
+  position: relative;
+  overflow: hidden; }
+  #services::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-height: 100%;
+    width: 100%;
+    background: rgba(32, 64, 134, 0.8); }
+
+/* iPhone Banner */
+#iphonebanner {
+  background: url(../img/Products/Misc/iphone_banner.jpg) no-repeat top center fixed;
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px; }
+  #iphonebanner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-height: 100%;
+    width: 100%;
+    background: rgba(32, 64, 134, 0.8); }
+  #iphonebanner.showcase-search {
+    min-height: 270px; }
+/* iPhone Banner */
+
+/* Apple Watch Banner */
+#awbanner {
+  background: url(../img/Products/Misc/apple_watch_banner.jpg) no-repeat top center fixed;
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px; 
+}
+#awbanner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-height: 100%;
+    width: 100%;
+    background: rgba(32, 64, 134, 0.8); 
+}
+#awbanner.showcase-search {
+    min-height: 270px; }
+/* Apple Watch Banner */
+
+/* iPad Banner */
+#ipadbanner {
+  background: url(../img/Products/Misc/ipad_banner.jpg) no-repeat top center fixed;
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px; 
+}
+#ipadbanner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-height: 100%;
+    width: 100%;
+    background: rgba(32, 64, 134, 0.8); 
+}
+#ipadbanner.showcase-search {
+    min-height: 270px; }
+/* iPad Banner */
+
+/* Contact Banner */
+#contactbanner {
+  background: url(../img/Products/Misc/contact_banner8.jpg) no-repeat top center fixed;
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px; 
+}
+#contactbanner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-height: 100%;
+    width: 100%;
+    background: rgba(32, 64, 134, 0.8); 
+}
+#contactbanner.showcase-search {
+    min-height: 270px; }
+/* Contact Banner */
+
+/* About us Banner */
+#aboutusbanner {
+  background: url(../img/Products/Misc/about_us.jpg) no-repeat top center fixed;
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px; 
+}
+#aboutusbanner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-height: 100%;
+    width: 100%;
+    background: rgba(32, 64, 134, 0.8); 
+}
+#aboutusbanner.showcase-search {
+    min-height: 270px; }
+/* about us Banner */
+
+#work {
+  padding: 6rem 0; }
+
+.listing-preview a {
+  position: relative; }
+
+@media (max-width: 991px) {
+  #showcase {
+    padding-top: 4rem; }
+    #showcase h1 {
+      font-size: 40px; }
+  .hide-md-down {
+    display: none; } }
+
+@media (max-width: 768px) {
+  #showcase {
+    padding-top: 3rem; }
+    #showcase h1 {
+      font-size: 40px; }
+    #showcase p {
+      display: none; }
+  #top-bar {
+    text-align: center; }
+    #top-bar .social {
+      text-align: center !important; } }
+
+@media (max-width: 576px) {
+  #showcase h1 {
+    font-size: 30px; }
+  #showcase-inner h1 {
+    font-size: 40px; } }
+
+iframe { 
+  float: left;
+}
+
+.product-images {
+  width: 250; 
+  height: 250; 
+  object-fit: cover;
+}
+
+.about-us-img {
+  width: 200px;
+  height: 200px;
+}

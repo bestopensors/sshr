@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section id="contactbanner" class="py-5 text-white">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-md-12">
+          <h1 class="display-4">Contact us</h1>
+          <p class="lead">If you have any questions, you can contact us through any of these methods.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Breadcrumb -->
+  <section id="bc" class="mt-3">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'index' %}"><!--ime koje smo dali u metodi koja je odgovorna za učitavanje stranice-->
+              <i class="fas fa-home"></i> Home Page</a>
+          </li>
+          <li class="breadcrumb-item active"> Contact</li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+
+<div class="container">
+
+    <!--<div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon1">Your email</span>
+      </div>
+      <input type="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="basic-addon1">
+    </div>
+
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon1">Name</span>
+      </div>
+      <input type="text" class="form-control" placeholder="Name" aria-label="Name" aria-describedby="basic-addon1">
+    </div>
+    
+    <label for="basic-url">Your vanity URL</label>
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon3">https://example.com/users/</span>
+      </div>
+      <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+    </div>
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Upload</span>
+      </div>
+      <div class="custom-file">
+        <input type="file" class="custom-file-input" id="inputGroupFile01">
+        <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+      </div>
+    </div>
+    
+    <div class="input-group">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Your Message</span>
+      </div>
+      <textarea class="form-control" aria-label="With textarea"></textarea>
+    </div>
+</div> -->
+
+
+<div class="containercontact">
+  <div style="text-align:center">
+    <h2>Contact Us</h2>
+    <p>Swing by for a cup of coffee, or leave us a message:</p>
+  </div>
+  <div class="row">
+    <div class="columncontact">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d695.2060778721665!2d16.013950438724432!3d45.81477684605964!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4765d6fc42d6f1d7%3A0xb2f800e467a2c218!2sPrivatna%20gimnazija%20i%20ekonomsko-informati%C4%8Dka%20%C5%A1kola%20Futura!5e0!3m2!1shr!2shr!4v1620151058781!5m2!1shr!2shr" width="500px" height="400" style="border: 0; margin-left: 5%;" allowfullscreen=""></iframe>
+    </div>
+    <div class="columncontact">
+      <form action="/action_page.php">
+        <label for="fname">First Name</label>
+        <input type="text" id="fname" name="firstname" placeholder="Your name..">
+        <label for="lname">Last Name</label>
+        <input type="text" id="lname" name="lastname" placeholder="Your last name..">
+
+        <label for="subject">Write a message</label>
+        <textarea id="subject fname" name="subject" placeholder="Write something.." style="height: 155px;"></textarea>
+        <input type="submit" id="fname" value="Submit" style="width: 30%; margin-left: 35%;">
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!--<a href="mailto:EMAILADDRESS">Send Email</a>-->
+{% endblock %}
