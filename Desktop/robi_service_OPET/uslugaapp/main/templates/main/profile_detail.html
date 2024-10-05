@@ -1,0 +1,334 @@
+<!-- main/templates/main/profile_detail.html -->
+
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ profile.user.username }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="profile-section py-5" style="background-color: #2C2F33;">
+    <div class="container">
+        <!-- Profile Card -->
+        <div class="card profile-card p-4" style="max-width: 900px; margin: auto; background-color: #3B3F42; color: #FFF;">
+            <div class="row no-gutters">
+                <!-- Profile Image -->
+                <div class="col-md-4 text-center">
+                    {% if profile.image %}
+                        <img src="{{ profile.image.url }}" class="rounded-circle mb-3" alt="Profile Image" style="width: 150px; height: 150px; border: 4px solid #fff;">
+                    {% else %}
+                        <img src="{% static 'main/default_profile.png' %}" class="rounded-circle mb-3" alt="Default Profile Image" style="width: 150px; height: 150px; border: 4px solid #fff;">
+                    {% endif %}
+                </div>
+
+                <!-- Profile Info and Services -->
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ profile.user.username }}</h3>
+                        <p class="card-text"><small>Email: {{ profile.email }}</small></p>
+                        <p class="card-text"><small>Phone: {{ profile.phone }}</small></p>
+                        <p>{{ profile.bio }}</p>
+                    
+                        <!-- Services Offered -->
+                        <div class="services-offered mt-4">
+                            <h5>Services Offered:</h5>
+                            <p>
+                                {% if profile.subservices.all %}
+                                    {% for subservice in profile.subservices.all %}
+                                        {{ subservice.name }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span>No services selected.</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    
+                        <!-- Overall Rating -->
+                        <div class="overall-rating mt-4">
+                            <h5>Overall Rating:</h5>
+                            <div class="star-rating" data-rating="{{ total_average_rating|default:0 }}">
+                                <!-- Stars will be rendered here via JavaScript -->
+                            </div>
+                        </div>
+                    
+                        <!-- Edit Profile Button -->
+                        {% if user == profile.user %}
+                            <a href="{% url 'edit_profile' %}" class="btn btn-light btn-sm mt-3">Edit Profile</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Ratings and Comments Section -->
+        <div class="comments-section mt-5">
+            <h4 class="text-center text-white">Ratings and Comments</h4>
+            <div class="row mt-4">
+                {% for rating in ratings %}
+                    <div class="col-12 mb-2">
+                        <div class="media p-2" style="background-color: #4A4D52; color: #FFF; border-radius: 5px;">
+                            <img src="{% if rating.rater.profile.image %}{{ rating.rater.profile.image.url }}{% else %}{% static 'main/default_profile.png' %}{% endif %}" class="mr-3 rounded-circle" alt="User Image" width="40" height="40">
+                            <div class="media-body d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mt-0">{{ rating.rater.username }}</h6>
+                                    <p>{{ rating.comment|truncatechars:50 }}</p> <!-- Shortened comment -->
+                                    <small class="text-muted">{{ rating.created_at|date:"F j, Y, g:i a" }}</small>
+                                </div>
+                                <div class="star-rating" data-rating="{{ rating.rating }}" style="font-size: 1.2rem;">
+                                    <!-- Stars will be rendered here via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-center text-white">No ratings or comments yet.</p>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination Controls -->
+            <nav aria-label="Comments pagination">
+                <ul class="pagination justify-content-center">
+                    {% if ratings.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ ratings.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in ratings.paginator.page_range %}
+                        {% if ratings.number == num %}
+                            <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                        {% elif num > ratings.number|add:'-3' and num < ratings.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if ratings.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ ratings.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+        <hr>
+
+        <!-- Add Rating and Comment Section -->
+<div class="row mt-5">
+    <div class="col-md-8 offset-md-2">
+        <h4 class="text-center text-white">Leave a Rating and Comment</h4>
+        {% if user.is_authenticated %}
+            {% if user != profile.user %}
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Rating Field -->
+                    <div class="form-group">
+                        <label for="id_rating" class="font-weight-bold">Your Rating:</label>
+                        <div id="star-rating" class="star-rating-input">
+                            <i class="far fa-star" data-value="1"></i>
+                            <i class="far fa-star" data-value="2"></i>
+                            <i class="far fa-star" data-value="3"></i>
+                            <i class="far fa-star" data-value="4"></i>
+                            <i class="far fa-star" data-value="5"></i>
+                        </div>
+                        {{ form.rating }}
+                        {% if form.rating.errors %}
+                            <div class="text-danger">{{ form.rating.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.comment }}
+                        {% if form.comment.errors %}
+                            <div class="text-danger">{{ form.comment.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                </form>
+            {% else %}
+                <p class="text-center text-white">You cannot rate your own profile.</p>
+            {% endif %}
+        {% else %}
+            <p class="text-center text-white">Please <a href="{% url 'login' %}">log in</a> to leave a rating and comment.</p>
+        {% endif %}
+    </div>
+</div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+    .profile-card {
+        background-color: #3B3F42;
+        color: #FFF;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
+
+    .star-rating i {
+        font-size: 18px;
+        color: gold;
+        margin-right: 3px;
+    }
+
+    .list-group-item {
+        background-color: #4A4D52;
+        border: none;
+        color: #FFF;
+    }
+
+    .media-body h6 {
+        color: #FFF;
+        margin-bottom: 5px;
+    }
+
+    .media {
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    .comments-section .media img {
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+    }
+
+    .media-body {
+        padding: 5px;
+    }
+
+    .star-rating {
+        text-align: right;
+    }
+
+    /* Pagination Styles */
+    .pagination .page-link {
+        color: #FFF;
+        background-color: #6c757d;
+        border: none;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #5a6268;
+        color: #FFF;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+        background-color: #4A4D52;
+        pointer-events: none;
+    }
+
+    /* Star Rating Input Styles */
+    .star-rating-input i {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #FFD700;
+    }
+
+    .star-rating-input i:hover,
+    .star-rating-input i.selected {
+        color: #FFC107;
+    }
+
+    /* Button Styles */
+    .btn-block {
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// JavaScript for star ratings
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to render stars based on data-rating
+    function renderStars(container, rating) {
+        container.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            let star = document.createElement('i');
+            if (rating >= i) {
+                star.classList.add('fas', 'fa-star', 'text-warning'); // Solid star
+            } else if (rating >= (i - 0.5)) {
+                star.classList.add('fas', 'fa-star-half-alt', 'text-warning'); // Half star
+            } else {
+                star.classList.add('far', 'fa-star', 'text-warning'); // Regular (empty) star
+            }
+            container.appendChild(star);
+        }
+    }
+
+    // Render average rating stars
+    const averageRatingElements = document.querySelectorAll('.star-rating[data-rating]');
+    averageRatingElements.forEach(function(element) {
+        let rating = parseFloat(element.getAttribute('data-rating'));
+        if (isNaN(rating)) rating = 0;
+        renderStars(element, rating);
+    });
+
+    // Star Rating Input
+    const starInputContainer = document.getElementById('star-rating');
+    const starInput = document.getElementById('id_rating');
+
+    if (starInputContainer) {
+        let selectedRating = 0;
+        starInputContainer.querySelectorAll('i').forEach(function(star) {
+            star.addEventListener('mouseover', function() {
+                let val = parseFloat(star.getAttribute('data-value'));
+                renderHoverStars(starInputContainer, val);
+            });
+
+            star.addEventListener('mouseout', function() {
+                renderHoverStars(starInputContainer, selectedRating);
+            });
+
+            star.addEventListener('click', function() {
+                selectedRating = parseFloat(star.getAttribute('data-value'));
+                starInput.value = selectedRating;
+                renderStars(starInputContainer, selectedRating);
+            });
+        });
+
+        function renderHoverStars(container, rating) {
+            container.querySelectorAll('i').forEach(function(star, index) {
+                if (rating >= index + 1) {
+                    star.classList.remove('far', 'fa-star');
+                    star.classList.add('fas', 'fa-star');
+                } else if (rating >= index + 0.5) {
+                    star.classList.remove('far', 'fa-star');
+                    star.classList.add('fas', 'fa-star-half-alt');
+                } else {
+                    star.classList.remove('fas', 'fa-star', 'fa-star-half-alt');
+                    star.classList.add('far', 'fa-star');
+                }
+            });
+        }
+    }
+});
+</script>
+{% endblock %}

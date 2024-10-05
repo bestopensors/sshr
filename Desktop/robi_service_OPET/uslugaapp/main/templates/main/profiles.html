@@ -1,0 +1,77 @@
+<!-- main/templates/main/profiles.html -->
+
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Profiles for {{ subservice.name }}{% endblock %}
+
+{% block content %}
+<h2>Professionals Offering {{ subservice.name }}</h2>
+<div class="row">
+    {% for profile in profiles %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    {% if profile.image %}
+                        <img src="{{ profile.image.url }}" class="img-fluid rounded-circle mb-3" alt="Profile Image" style="width: 100px; height: 100px;">
+                    {% else %}
+                        <img src="{% static 'main/default_profile.png' %}" class="img-fluid rounded-circle mb-3" alt="Default Profile Image" style="width: 100px; height: 100px;">
+                    {% endif %}
+                    <h5 class="card-title">{{ profile.user.username }}</h5>
+                    <p class="card-text">{{ profile.bio|truncatewords:20 }}</p>
+                    
+                    <!-- Display the average rating as golden stars -->
+                    <div class="star-rating" data-rating="{{ profile.avg_rating|default:0 }}">
+                        <!-- Stars will be rendered here via JavaScript -->
+                    </div>
+
+                    {% if profile.avg_rating %}
+                        <p>Average Rating: {{ profile.avg_rating|floatformat:1 }} stars</p>
+                    {% else %}
+                        <p>No ratings yet.</p>
+                    {% endif %}
+
+                    <a href="{% url 'profile_detail' profile.id %}" class="btn btn-primary">View Profile</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'add_rating' ratee_id=profile.user.id subservice_id=subservice.id %}" class="btn btn-warning mt-2">Rate</a>
+                    {% else %}
+                        <p>Please <a href="{% url 'login' %}">log in</a> to rate this professional.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>No professionals found for this subservice.</p>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Function to render stars based on data-rating
+document.addEventListener('DOMContentLoaded', function() {
+    function renderStars(container, rating) {
+        container.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            let star = document.createElement('i');
+            if (rating >= i) {
+                star.classList.add('fas', 'fa-star', 'text-warning'); // Solid star (gold)
+            } else if (rating >= (i - 0.5)) {
+                star.classList.add('fas', 'fa-star-half-alt', 'text-warning'); // Half star (gold)
+            } else {
+                star.classList.add('far', 'fa-star', 'text-warning'); // Empty star (gold)
+            }
+            container.appendChild(star);
+        }
+    }
+
+    // Render average rating stars
+    const averageRatingElements = document.querySelectorAll('.star-rating[data-rating]');
+    averageRatingElements.forEach(function(element) {
+        let rating = parseFloat(element.getAttribute('data-rating'));
+        if (isNaN(rating)) rating = 0;
+        renderStars(element, rating);
+    });
+});
+</script>
+{% endblock %}

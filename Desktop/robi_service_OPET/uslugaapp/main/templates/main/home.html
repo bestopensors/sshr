@@ -1,0 +1,78 @@
+<!-- main/templates/main/home.html -->
+
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+     <!-- Services Section -->
+     <section>
+        <h2 class="text-center mb-4">Our Services</h2>
+        <div class="row">
+            {% for service in services %}
+            <div class="col-md-4 mb-4">
+                <a href="{% url 'service_detail' service.id %}" class="text-decoration-none">
+                    <div class="card clickable-card">
+                        <img src="{% if service.image %}{{ service.image.url }}{% else %}{% static 'main/default_service.png' %}{% endif %}" class="card-img-top" alt="{{ service.name }}">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ service.name }}</h5>
+                            <p class="card-text">{{ service.description|truncatewords:15 }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Paid Ads Section -->
+    <section class="mt-5">
+        <h2 class="text-center mb-4">Paid Ads</h2>
+        <div class="row">
+            {% for ad in paid_ads %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{% if ad.image %}{{ ad.image.url }}{% else %}{% static 'main/default_ad.png' %}{% endif %}" class="card-img-top" alt="{{ ad.name }}">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ ad.name }}</h5>
+                        <p class="card-text">{{ ad.description|truncatewords:15 }}</p>
+                        <a href="{% url 'service_detail' ad.id %}" class="btn btn-primary">View Service</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}

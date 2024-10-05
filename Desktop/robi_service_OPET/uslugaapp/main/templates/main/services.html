@@ -1,0 +1,123 @@
+<!-- main/templates/main/services.html -->
+
+{% extends 'main/base.html' %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block title %}Services{% endblock %}
+
+{% block content %}
+<h2>Private Workers Looking for Jobs</h2>
+
+<!-- Filter Section with Buttons -->
+<div class="container mb-4">
+    <div class="btn-group">
+        <!-- Button for All Subservices -->
+        <a href="{% url 'service_detail' service.id %}" class="btn btn-secondary {% if not selected_subservice_ids %}active{% endif %}">
+            All Subservices
+        </a>
+
+        <!-- Buttons for each subservice -->
+        {% for subservice in subservices %}
+        <a href="{% url 'service_detail' service.id %}?subservice={{ subservice.id }}" class="btn btn-secondary {% if subservice.id|stringformat:"s" in selected_subservice_ids %}active{% endif %}">
+            {{ subservice.name }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Profiles Section -->
+<div class="container">
+    {% for profile_data in private_profiles %}
+        <div class="row mb-4 justify-content-center">
+            <div class="col-12">
+                <a href="{% url 'profile_detail' profile_data.profile.id %}" class="card-link" style="text-decoration: none;">
+                    <div class="card bg-dark text-light p-4 profile-card">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <img src="{% static 'main/default_profile.png' %}" class="img-fluid rounded-circle" alt="Profile Image" style="width: 120px; height: 120px;">
+                            </div>
+                            <div class="col-md-9">
+                                <h3>{{ profile_data.profile.user.username }}</h3>
+                                <p>{{ profile_data.profile.subservices.all|join:", " }}</p>
+                                <p>Contact: {{ profile_data.profile.user.email }}</p>
+                                <!-- Star Rating -->
+                                <div class="star-rating" data-rating="{{ profile_data.average_rating }}" style="float: right; font-size: 1.5rem;">
+                                    <!-- Stars will be rendered here via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No private workers are currently looking for jobs.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+<!-- Add styles for hover effects and star rating -->
+<style>
+    .card-link {
+        display: block;
+    }
+
+    .profile-card:hover {
+        background-color: #343a40;
+        box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-card {
+        cursor: pointer;
+    }
+
+    /* Star rating CSS */
+    .star-rating i {
+        font-size: 20px;
+        color: gold;
+        margin-right: 5px;
+    }
+
+    /* Style for the button group */
+    .btn-group .btn {
+        margin-right: 10px;
+    }
+
+    /* Highlight active filter */
+    .btn.active {
+        background-color: #007bff;
+        color: white;
+    }
+</style>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to render stars based on data-rating
+        function renderStars(container, rating) {
+            container.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                let star = document.createElement('i');
+                if (rating >= i) {
+                    star.classList.add('fas', 'fa-star', 'text-warning'); // Full star
+                } else if (rating >= (i - 0.5)) {
+                    star.classList.add('fas', 'fa-star-half-alt', 'text-warning'); // Half star
+                } else {
+                    star.classList.add('far', 'fa-star', 'text-warning'); // Empty star
+                }
+                container.appendChild(star);
+            }
+        }
+
+        // Render the stars for each profile
+        const starRatingElements = document.querySelectorAll('.star-rating[data-rating]');
+        starRatingElements.forEach(function(element) {
+            const rating = parseFloat(element.getAttribute('data-rating'));
+            renderStars(element, rating);
+        });
+    });
+</script>
+{% endblock %}

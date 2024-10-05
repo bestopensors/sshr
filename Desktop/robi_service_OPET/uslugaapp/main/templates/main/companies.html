@@ -1,0 +1,36 @@
+<!-- main/templates/main/companies.html -->
+
+{% extends 'main/base.html' %}
+
+{% block title %}Companies{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <h2>Companies Looking for Workers</h2>
+<div class="row">
+    {% for profile in business_profiles %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ profile.user.username }}</h5>
+                    <p class="card-text">
+                        {% if profile.quantity %}
+                            Looking for {{ profile.quantity }} {{ profile.subservices.all|join:", " }} workers
+                        {% else %}
+                            Looking for workers in {{ profile.subservices.all|join:", " }}
+                        {% endif %}
+                    </p>
+                    <p>Contact: {{ profile.user.email }}</p>
+                    <!-- Add View Profile Button -->
+                    <a href="{% url 'profile_detail' profile.id %}" class="btn btn-primary">View Profile</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>No companies are currently looking for workers.</p>
+    {% endfor %}
+</div>
+
+</div>
+{% endblock %}

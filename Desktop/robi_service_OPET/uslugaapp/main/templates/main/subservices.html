@@ -1,0 +1,28 @@
+<!-- main/templates/main/subservices.html -->
+
+{% extends 'main/base.html' %}
+{% load bootstrap4 %}
+
+{% block title %}{{ service.name }} - Subservices{% endblock %}
+
+{% block content %}
+<h2>{{ service.name }} - Subservices</h2>
+<div class="row">
+    {% for subservice in subservices %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                {% if subservice.image %}
+                    <img src="{{ subservice.image.url }}" class="card-img-top" alt="{{ subservice.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ subservice.name }}</h5>
+                    <p class="card-text">{{ subservice.description }}</p>
+                    <a href="{% url 'profiles' subservice.id %}" class="btn btn-primary">View Profiles</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>No subservices available under this service.</p>
+    {% endfor %}
+</div>
+{% endblock %}

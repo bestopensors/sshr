@@ -1,0 +1,24 @@
+<!-- main/templates/main/add_rating.html -->
+
+{% extends 'main/base.html' %}
+{% load bootstrap4 %}  <!-- If using django-bootstrap4 -->
+
+{% block title %}Rate {{ ratee.username }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2>Rate {{ ratee.username }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}  <!-- If using django-bootstrap4 -->
+            <!-- If manually adding Bootstrap classes, loop through fields and add classes -->
+             <!-- Inside the profiles loop in profiles.html -->
+
+            <a href="{% url 'add_rating' ratee_id=profile.user.id subservice_id=subservice.id %}" class="btn btn-warning mt-2">Rate</a>
+
+            <button type="submit" class="btn btn-primary">Submit Rating</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

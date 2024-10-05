@@ -1,0 +1,16 @@
+<!-- main/templates/main/create_company.html -->
+
+{% extends 'main/base.html' %}
+
+{% block title %}Create Company Job Posting{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">Post a Job for Your Company</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Submit Job Posting</button>
+    </form>
+</div>
+{% endblock %}

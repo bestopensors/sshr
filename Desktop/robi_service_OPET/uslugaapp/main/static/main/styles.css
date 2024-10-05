@@ -1,0 +1,68 @@
+/* General page background */
+body {
+    background-color: #2F2F2F;  /* Dark gray for the overall background */
+    color: #E0E0E0;  /* Light gray for the text to contrast with dark background */
+}
+
+/* Navbar */
+.navbar {
+    background-color: #333333;  /* Darker gray for the navbar */
+    border-bottom: 1px solid #444444;  /* Add a border for some separation */
+}
+
+.navbar .nav-link {
+    color: #E0E0E0;  /* Light text color */
+}
+
+.navbar .nav-link:hover {
+    color: #FFFFFF;  /* White on hover */
+}
+
+/* Footer */
+.footer {
+    background-color: #333333;  /* Darker gray for the footer */
+    color: #E0E0E0;
+    padding: 20px 0;
+}
+
+.footer .text-muted {
+    color: #BBBBBB;  /* Slightly lighter text for muted sections */
+}
+
+/* Profile section */
+.profile-section {
+    background-color: #2C2F33;  /* Darker gray for the profile section */
+    padding: 60px 0;
+}
+
+/* Cards and other sections */
+.card, .list-group-item, .media {
+    background-color: #4A4D52;  /* Darker card backgrounds */
+    color: #E0E0E0;  /* Light text for contrast */
+    border: none;
+    border-radius: 10px;
+}
+
+.card:hover, .list-group-item:hover, .media:hover {
+    background-color: #55585C;  /* Slightly darker on hover */
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #0056b3;  /* Dark blue for primary buttons */
+    border-color: #004494;
+}
+
+.btn-primary:hover {
+    background-color: #004494;  /* Darker blue on hover */
+}
+
+/* Star rating */
+.star-rating i {
+    font-size: 18px;
+    color: gold;
+}
+
+.text-warning {
+    color: gold !important;
+}

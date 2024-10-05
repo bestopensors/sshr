@@ -1,0 +1,427 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4 text-center">Edit Your Profile</h2>
+
+            <!-- Profile Picture Section -->
+            <div class="text-center mb-4">
+                {% if profile.image %}
+                    <img src="{{ profile.image.url }}" class="rounded-circle mb-3" alt="Profile Image" width="150" height="150">
+                {% else %}
+                    <img src="{% static 'main/default_profile.png' %}" class="rounded-circle mb-3" alt="Default Profile Image" width="150" height="150">
+                {% endif %}
+                <div class="form-group">
+                    <label for="id_image" class="font-weight-bold">Change Profile Picture</label>
+                    {{ form.image }}
+                    {% if form.image.errors %}
+                        <div class="text-danger">
+                            {% for error in form.image.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Form Fields -->
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Display Non-Field Errors -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <!-- Bio Field -->
+                <div class="form-group">
+                    <label for="id_bio" class="font-weight-bold">Bio</label>
+                    {{ form.bio }}
+                    {% if form.bio.errors %}
+                        <div class="text-danger">
+                            {% for error in form.bio.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted">A brief description of yourself.</small>
+                </div>
+
+                <!-- Phone and Email Fields -->
+                <div class="form-row">
+                    <div class="col-md-6 mb-3">
+                        <label for="id_phone" class="font-weight-bold">Phone Number</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="text-danger">
+                                {% for error in form.phone.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="id_public_phone" class="font-weight-bold">Make Phone Number Public</label>
+                        {{ form.public_phone }}
+                        {% if form.public_phone.errors %}
+                            <div class="text-danger">
+                                {% for error in form.public_phone.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="col-md-6 mb-3">
+                        <label for="id_email" class="font-weight-bold">Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger">
+                                {% for error in form.email.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="id_public_email" class="font-weight-bold">Make Email Public</label>
+                        {{ form.public_email }}
+                        {% if form.public_email.errors %}
+                            <div class="text-danger">
+                                {% for error in form.public_email.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- User Type Field -->
+                <h4 class="mb-3">User Type</h4>
+                <div class="form-group">
+                    <label for="id_user_type" class="font-weight-bold">User Type</label>
+                    {{ form.user_type }}
+                    {% if form.user_type.errors %}
+                        <div class="text-danger">
+                            {% for error in form.user_type.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Choose whether you are a business owner or a private worker.</small>
+                </div>
+
+                <!-- Subservices Section -->
+                <h4 class="mb-3">Subservices </h4>
+
+                <!-- Search for Subservices -->
+                <div class="form-group">
+                    <input type="text" id="search-subservice" class="form-control" placeholder="Search Subservice...">
+                </div>
+
+                <div class="form-group">
+                    <label for="service-select" class="font-weight-bold">Select Service</label>
+                    <select id="service-select" class="form-control">
+                        <option value="">-- Select a Service --</option>
+                        <option value="all">All Services</option>
+                        {% for service in services %}
+                            <option value="{{ service.id }}">{{ service.name }}</option>
+                        {% endfor %}
+                    </select>
+                
+                    <!-- Subservices will be dynamically shown here -->
+                    <div id="subservices-container" class="mt-3" style="display: none;">
+                        <h5 class="font-weight-bold">Available Subservices</h5>
+                        <div id="subservices-list"></div>
+                    </div>
+                
+                    <!-- Hidden field to store selected subservices -->
+                    <input type="hidden" name="selected_subservices" id="selected_subservices" value="{% for subservice in profile.subservices.all %}{{ subservice.id }},{% endfor %}">
+                </div>
+
+                <!-- Display Selected Subservices -->
+                <h5 class="font-weight-bold">Currently Selected Subservices</h5>
+                <ul id="selected-subservices-list">
+                    {% for subservice in profile.subservices.all %}
+                        <li data-id="{{ subservice.id }}">{{ subservice.name }} <span class="remove-subservice" data-id="{{ subservice.id }}" style="color: red; cursor: pointer;">[Remove]</span></li>
+                    {% endfor %}
+                </ul>
+
+                <!-- Save Button -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success btn-lg">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const serviceSelect = document.getElementById('service-select');
+        const subservicesContainer = document.getElementById('subservices-container');
+        const subservicesList = document.getElementById('subservices-list');
+        const selectedSubservicesInput = document.getElementById('selected_subservices');
+        const searchSubserviceInput = document.getElementById('search-subservice');
+        const selectedSubservicesList = document.getElementById('selected-subservices-list');
+
+        // Retrieve subservices data from Django context (passed as JSON)
+        const subservicesData = {
+            {% for service_id, subs in subservices_by_service.items %}
+                "{{ service_id }}": [
+                    {% for sub in subs %}
+                        {"id": "{{ sub.id }}", "name": "{{ sub.name }}"}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        };
+
+        // Initialize selectedSubservices array with existing selections
+        let selectedSubservices = [];
+        {% for subservice in profile.subservices.all %}
+            selectedSubservices.push({
+                id: "{{ subservice.id }}",
+                name: "{{ subservice.name }}"
+            });
+        {% endfor %}
+        selectedSubservicesInput.value = selectedSubservices.map(sub => sub.id).join(',');
+
+        // Function to render selected subservices in the UI
+        function renderSelectedSubservices(selected) {
+            selectedSubservicesList.innerHTML = '';
+            selected.forEach(subservice => {
+                const li = document.createElement('li');
+                li.innerHTML = `${subservice.name} <span class="remove-subservice" data-id="${subservice.id}" style="color: red; cursor: pointer;">[Remove]</span>`;
+                li.dataset.id = subservice.id;
+                selectedSubservicesList.appendChild(li);
+
+                // Handle remove subservice event
+                li.querySelector('.remove-subservice').addEventListener('click', function() {
+                    const idToRemove = this.dataset.id;
+                    selectedSubservices = selectedSubservices.filter(s => s.id != idToRemove);
+                    selectedSubservicesInput.value = selectedSubservices.map(sub => sub.id).join(',');
+                    renderSelectedSubservices(selectedSubservices);
+                });
+            });
+        }
+
+        renderSelectedSubservices(selectedSubservices);
+
+        // Event listener for service selection
+serviceSelect.addEventListener('change', function() {
+    const selectedServiceId = this.value;
+
+    if (selectedServiceId === 'all') {
+        subservicesContainer.style.display = 'block';
+        subservicesList.innerHTML = '';
+
+        // Render all subservices checkboxes
+        for (const serviceId in subservicesData) {
+            subservicesData[serviceId].forEach(subservice => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'subservices_checkbox';
+                checkbox.value = subservice.id;
+                checkbox.id = 'subservice_' + subservice.id;
+
+                const label = document.createElement('label');
+                label.htmlFor = 'subservice_' + subservice.id;
+                label.innerText = subservice.name;
+
+                const div = document.createElement('div');
+                div.classList.add('form-check', 'mb-2');
+                div.appendChild(checkbox);
+                div.appendChild(label);
+
+                subservicesList.appendChild(div);
+
+                // Pre-check subservices that are already selected
+                if (selectedSubservices.some(s => s.id == subservice.id)) {
+                    checkbox.checked = true;
+                }
+
+                // When checked/unchecked, update the selected subservices
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Prevent duplicates
+                        if (!selectedSubservices.some(s => s.id == subservice.id)) {
+                            selectedSubservices.push({
+                                id: subservice.id,
+                                name: subservice.name
+                            });
+                        }
+                    } else {
+                        selectedSubservices = selectedSubservices.filter(s => s.id != subservice.id);
+                    }
+                    selectedSubservicesInput.value = selectedSubservices.map(sub => sub.id).join(',');
+                    renderSelectedSubservices(selectedSubservices);
+                });
+            });
+        }
+    } else if (selectedServiceId && subservicesData[selectedServiceId]) {
+        subservicesContainer.style.display = 'block';
+        subservicesList.innerHTML = '';
+
+        // Render subservices checkboxes
+        subservicesData[selectedServiceId].forEach(subservice => {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'subservices_checkbox';
+            checkbox.value = subservice.id;
+            checkbox.id = 'subservice_' + subservice.id;
+
+            const label = document.createElement('label');
+            label.htmlFor = 'subservice_' + subservice.id;
+            label.innerText = subservice.name;
+
+            const div = document.createElement('div');
+            div.classList.add('form-check', 'mb-2');
+            div.appendChild(checkbox);
+            div.appendChild(label);
+
+            subservicesList.appendChild(div);
+
+            // Pre-check subservices that are already selected
+            if (selectedSubservices.some(s => s.id == subservice.id)) {
+                checkbox.checked = true;
+            }
+
+            // When checked/unchecked, update the selected subservices
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Prevent duplicates
+                    if (!selectedSubservices.some(s => s.id == subservice.id)) {
+                        selectedSubservices.push({
+                            id: subservice.id,
+                            name: subservice.name
+                        });
+                    }
+                } else {
+                    selectedSubservices = selectedSubservices.filter(s => s.id != subservice.id);
+                }
+                selectedSubservicesInput.value = selectedSubservices.map(sub => sub.id).join(',');
+                renderSelectedSubservices(selectedSubservices);
+            });
+        });
+    } else {
+        subservicesContainer.style.display = 'none';
+        subservicesList.innerHTML = '';
+    }
+});
+
+        // Add search functionality for subservices
+searchSubserviceInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    subservicesList.innerHTML = '';
+
+    const selectedServiceId = serviceSelect.value;
+
+    if (selectedServiceId === 'all') {
+        // Render all subservices checkboxes
+        for (const serviceId in subservicesData) {
+            subservicesData[serviceId].forEach(subservice => {
+                if (subservice.name.toLowerCase().includes(searchTerm)) {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'subservices_checkbox';
+                    checkbox.value = subservice.id;
+                    checkbox.id = 'subservice_' + subservice.id;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = 'subservice_' + subservice.id;
+                    label.innerText = subservice.name;
+
+                    const div = document.createElement('div');
+                    div.classList.add('form-check', 'mb-2');
+                    div.appendChild(checkbox);
+                    div.appendChild(label);
+
+                    subservicesList.appendChild(div);
+
+                    // Pre-check subservices that are already selected
+                    if (selectedSubservices.some(s => s.id == subservice.id)) {
+                        checkbox.checked = true;
+                    }
+
+                    // When checked/unchecked, update the selected subservices
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            // Prevent duplicates
+                            if (!selectedSubservices.some(s => s.id == subservice.id)) {
+                                selectedSubservices.push({
+                                    id: subservice.id,
+                                    name: subservice.name
+                                });
+                            }
+                        } else {
+                            selectedSubservices = selectedSubservices.filter(s => s.id != subservice.id);
+                        }
+                        selectedSubservicesInput.value = selectedSubservices.map(sub => sub.id).join(',');
+                        renderSelectedSubservices(selectedSubservices);
+                    });
+                }
+            });
+        }
+    } else if (selectedServiceId && subservicesData[selectedServiceId]) {
+        // Render subservices checkboxes for the selected service
+        subservicesData[selectedServiceId].forEach(subservice => {
+            if (subservice.name.toLowerCase().includes(searchTerm)) {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'subservices_checkbox';
+                checkbox.value = subservice.id;
+                checkbox.id = 'subservice_' + subservice.id;
+
+                const label = document.createElement('label');
+                label.htmlFor = 'subservice_' + subservice.id;
+                label.innerText = subservice.name;
+
+                const div = document.createElement('div');
+                div.classList.add('form-check', 'mb-2');
+                div.appendChild(checkbox);
+                div.appendChild(label);
+
+                subservicesList.appendChild(div);
+
+                // Pre-check subservices that are already selected
+                if (selectedSubservices.some(s => s.id == subservice.id)) {
+                    checkbox.checked = true;
+                }
+
+                // When checked/unchecked, update the selected subservices
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Prevent duplicates
+                        if (!selectedSubservices.some(s => s.id == subservice.id)) {
+                            selectedSubservices.push({
+                                id: subservice.id,
+                                name: subservice.name
+                            });
+                        }
+                    } else {
+                        selectedSubservices = selectedSubservices.filter(s => s.id != subservice.id);
+                    }
+                    selectedSubservicesInput.value = selectedSubservices.map(sub => sub.id).join(',');
+                    renderSelectedSubservices(selectedSubservices);
+                });
+            }
+        });
+    }
+});
+    });
+</script>
+{% endblock %}

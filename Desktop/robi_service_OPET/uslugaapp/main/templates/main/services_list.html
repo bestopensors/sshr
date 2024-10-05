@@ -1,0 +1,17 @@
+<!-- main/templates/main/services_list.html -->
+
+{% extends 'main/base.html' %}
+{% block title %}Available Services{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Available Services</h2>
+    <div class="list-group">
+        {% for service in services %}
+            <a href="{% url 'service_detail' service.id %}" class="list-group-item list-group-item-action">
+                {{ service.name }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
