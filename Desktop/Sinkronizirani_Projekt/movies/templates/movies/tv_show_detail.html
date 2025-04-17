@@ -1,0 +1,70 @@
+{% extends "movies/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-4">
+      {% if tv_show.poster_image %}
+        <img src="{{ tv_show.poster_image.url }}" alt="{{ tv_show.title }}" class="img-fluid rounded clickable-image" onclick="openModal('{{ tv_show.poster_image.url }}')">
+      {% endif %}
+    </div>
+    <div class="col-md-8">
+      <h1>{{ tv_show.title }}</h1>
+      <p>{{ tv_show.description }}</p>
+      <p><strong>Release Year:</strong> {{ tv_show.release_year }}</p>
+      <p><strong>Total Seasons:</strong> {{ tv_show.total_seasons }}</p>
+      <p><strong>Dubbed Seasons:</strong> {{ tv_show.dubbed_seasons }}</p>
+    </div>
+  </div>
+  <hr>
+  <h3>Seasons</h3>
+  {% for season in tv_show.seasons.all %}
+      <div class="card mb-3">
+          <div class="card-body">
+              <h5 style="color: {% if season.is_dubbed %}green{% else %}red{% endif %};">
+                  Season {{ season.season_number }} – {% if season.is_dubbed %}Dubbed{% else %}Not Dubbed{% endif %}
+              </h5>
+              <ul class="list-group">
+                  {% for episode in season.episodes.all %}
+                      <li class="list-group-item">
+                          <strong>S{{ season.season_number }}E{{ episode.episode_number }}:</strong> {{ episode.title }}
+                          {% if episode.is_dubbed %}
+                              <span class="badge bg-success">Dubbed</span>
+                          {% else %}
+                              <span class="badge bg-danger">Not Dubbed</span>
+                          {% endif %}
+                      </li>
+                  {% endfor %}
+              </ul>
+          </div>
+      </div>
+  {% endfor %}
+</div>
+
+<!-- Modal for TV Show Image Popup -->
+<div id="imageModal" class="modal">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="modalImage">
+</div>
+
+<script>
+  var modal = document.getElementById("imageModal");
+  var modalImg = document.getElementById("modalImage");
+  var closeBtn = document.getElementsByClassName("close")[0];
+
+  function openModal(src) {
+      modal.style.display = "block";
+      modalImg.src = src;
+  }
+
+  closeBtn.onclick = function() {
+      modal.style.display = "none";
+  }
+
+  modal.onclick = function(event) {
+      if (event.target === modal) {
+          modal.style.display = "none";
+      }
+  }
+</script>
+{% endblock %}

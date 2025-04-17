@@ -1,0 +1,111 @@
+{% extends "movies/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <!-- ... (Actor Header: Image & Details - KEEP AS IS) ... -->
+    <div class="row">
+        <div class="col-md-4 text-center">
+            {% if actor.photo %}
+                <img src="{{ actor.photo.url }}" alt="{{ actor.name }}"
+                     class="img-fluid clickable-image mb-3"
+                     style="max-width:250px; max-height:250px; cursor:pointer; margin:auto; display:block;"
+                     onclick="openModal('{{ actor.photo.url }}')">
+            {% else %}
+                <img src="{% static 'images/placeholder.png' %}" alt="{{ actor.name }}"
+                     class="img-fluid mb-3"
+                     style="max-width:250px; max-height:250px; margin:auto; display:block;">
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h1>{{ actor.name }}</h1>
+            <p><strong>Bio:</strong> {{ actor.bio|default:"N/A" }}</p>
+            <p><strong>Place of Birth:</strong> {{ actor.place_of_birth|default:"N/A" }}</p>
+            <p><strong>Date of Birth:</strong> {{ actor.date_of_birth|date:"F j, Y"|default:"N/A" }}</p>
+            <p><strong>Gender:</strong> {{ actor.gender|default:"N/A" }}</p>
+            <p><strong>Age:</strong> {{ actor.age|default:"N/A" }}</p>
+
+             <!-- Social Media Links with conditional message -->
+            <h5 class="mt-4">Social Media</h5>
+            {% if actor.instagram or actor.facebook or actor.x %}
+                <ul class="list-inline" style="padding: 0;">
+                    {% if actor.instagram %}
+                    <li class="list-inline-item">
+                        <a href="{{ actor.instagram }}" target="_blank">
+                        <img src="{% static 'images/instagram.png' %}" alt="Instagram" style="max-width:50px; height:auto; cursor:pointer;" class="social-icon">
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if actor.facebook %}
+                    <li class="list-inline-item">
+                        <a href="{{ actor.facebook }}" target="_blank">
+                        <img src="{% static 'images/facebook.png' %}" alt="Facebook" style="max-width:50px; height:auto; cursor:pointer;" class="social-icon">
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if actor.x %}
+                    <li class="list-inline-item">
+                        <a href="{{ actor.x }}" target="_blank">
+                        <img src="{% static 'images/x.png' %}" alt="X" style="max-width:50px; height:auto; cursor:pointer;" class="social-icon">
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No social links available.</p> {# Message when no links exist #}
+            {% endif %}
+            <!-- End Social Media Links -->
+        </div>
+    </div>
+    <hr>
+    <!-- ... (Movies List - KEEP AS IS) ... -->
+    <h3 class="mt-4">Movies</h3>
+    {% if movie_roles.exists %}
+        <div class="list-group">
+            {% for role in movie_roles %}
+                <div class="list-group-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            {% if role.movie.poster_image %}
+                                <img src="{{ role.movie.poster_image.url }}" alt="{{ role.movie.title }}"
+                                     class="img-fluid rounded"
+                                     style="max-width:100px; max-height:100px;">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <p class="mb-1"><strong>{{ role.movie.title }}</strong> ({{ role.movie.release_year }})</p>
+                            <p class="mb-0">{{ role.voice_actor.name }} &nbsp;<span><strong>as</strong></span>&nbsp; {{ role.character_name }}</p>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <a href="{% url 'movie_detail' role.movie.get_slug %}" class="btn btn-sm btn-primary">View Movie</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No movies available for this actor.</p>
+    {% endif %}
+</div>
+<!-- ... (Modal and Script - KEEP AS IS) ... -->
+<div id="imageModal" class="modal">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="modalImage">
+</div>
+<script>
+  var modal = document.getElementById("imageModal");
+  var modalImg = document.getElementById("modalImage");
+  var closeBtn = document.getElementsByClassName("close")[0]; // Corrected selector
+  function openModal(imageSrc) {
+    modal.style.display = "block";
+    modalImg.src = imageSrc;
+  }
+  closeBtn.onclick = function() {
+    modal.style.display = "none";
+  }
+  modal.onclick = function(event) {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  }
+</script>
+{% endblock %}

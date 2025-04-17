@@ -1,0 +1,112 @@
+{% extends "movies/base.html" %}
+{% load static %}
+{% block title %}{{ company.name }} - DubbedDB{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Company Header -->
+    <div class="row align-items-center">
+        <div class="col-md-4 text-center">
+            {% if company.logo %}
+                <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="img-fluid rounded clickable-image" style="max-width:250px; max-height:250px;">
+            {% else %}
+                <img src="{% static 'images/placeholder_company.png' %}" alt="Placeholder" class="img-fluid rounded" style="max-width:250px; max-height:250px;">
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h1>{{ company.name }}</h1>
+            {% if company.website %}
+                <p><strong>Website:</strong> <a href="{{ company.website }}" target="_blank">{{ company.website }}</a></p>
+            {% else %}
+                <p><strong>Website:</strong> N/A</p>
+            {% endif %}
+            <!-- Social Media Links -->
+            <h5 class="mt-3">Social Media</h5>
+            {% if company.instagram or company.facebook or company.twitter or company.x %}
+                <ul class="list-inline">
+                    {% if company.instagram %}
+                        <li class="list-inline-item">
+                            <a href="{{ company.instagram }}" target="_blank">
+                                <img src="{% static 'images/instagram.png' %}" alt="Instagram" style="max-width:50px; height:auto;" class="social-icon">
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if company.facebook %}
+                        <li class="list-inline-item">
+                            <a href="{{ company.facebook }}" target="_blank">
+                                <img src="{% static 'images/facebook.png' %}" alt="Facebook" style="max-width:50px; height:auto;" class="social-icon">
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if company.twitter %}
+                        <li class="list-inline-item">
+                            <a href="{{ company.twitter }}" target="_blank">
+                                <img src="{% static 'images/twitter.png' %}" alt="Twitter" style="max-width:50px; height:auto;" class="social-icon">
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if company.x %}
+                        <li class="list-inline-item">
+                            <a href="{{ company.x }}" target="_blank">
+                                <img src="{% static 'images/x.png' %}" alt="X" style="max-width:50px; height:auto;" class="social-icon">
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No social links available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Voice Actors Section -->
+    <h3 class="mt-4">Voice Actors from {{ company.name }}</h3>
+    {% if voice_actors %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for actor in voice_actors %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <a href="{% url 'actor_detail' actor.pk %}">
+                            {% if actor.photo %}
+                                <img src="{{ actor.photo.url }}" alt="{{ actor.name }}" class="card-img-top actor-image" style="height: 300px; object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'images/placeholder.png' %}" alt="Placeholder" class="card-img-top actor-image" style="height: 300px; object-fit: cover;">
+                            {% endif %}
+                        </a>
+                        <div class="card-body">
+                            <h6 class="card-title text-center">{{ actor.name }}</h6>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">No voice actors found for this company.</p>
+    {% endif %}
+</div>
+
+<!-- Modal for Image Popup -->
+<div id="imageModal" class="modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modalImage">
+</div>
+<script>
+    var modal = document.getElementById("imageModal");
+    var modalImg = document.getElementById("modalImage");
+    var closeBtn = document.getElementsByClassName("close")[0];
+    function openModal(src) {
+        modal.style.display = "block";
+        modalImg.src = src;
+    }
+    closeBtn.onclick = function() {
+        modal.style.display = "none";
+    }
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

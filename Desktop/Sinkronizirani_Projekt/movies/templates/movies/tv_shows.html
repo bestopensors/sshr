@@ -1,0 +1,161 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block title %}TV Shows - DubbedDB{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">TV Shows</h1>
+
+    <!-- Search, Sort, Filter Form -->
+    <form method="GET" class="mb-4 p-4 border rounded bg-light">
+        <div class="row g-3">
+            <!-- Search -->
+            <div class="col-md-12">
+                <label for="q" class="form-label">Search Title</label>
+                <input type="text" 
+       name="q" 
+       id="q" 
+       value="{{ query|default:'' }}" 
+       placeholder="e.g: iCarly" 
+       class="form-control"
+       hx-get="{% url 'tv_shows' %}"
+       hx-trigger="input changed delay:500ms"
+       hx-target="#results-container"
+       hx-include="[name='sort'], [name='direction'], [name='start_year'], [name='end_year'], [name='letter'], [name='company']">
+            </div>
+
+            <!-- Sorting -->
+            <div class="col-md-6">
+                <label for="sort" class="form-label">Sort By</label>
+                <div class="input-group">
+                    <select name="sort" id="sort" class="form-select">
+                        <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option>
+                        <option value="release_year" {% if sort_by == 'release_year' %}selected{% endif %}>Release Year</option>
+                    </select>
+                    <select name="direction" class="form-select" style="max-width: 100px;">
+                        <option value="asc" {% if direction == 'asc' %}selected{% endif %}>Asc ↑</option>
+                        <option value="desc" {% if direction == 'desc' %}selected{% endif %}>Desc ↓</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Filter by Company -->
+            <div class="col-md-6">
+                <label for="company" class="form-label">Dubbing Company</label>
+                <select name="company" id="company" class="form-select">
+                    <option value="">All Companies</option>
+                    {% for company in companies %}
+                        <option value="{{ company.id }}" {% if company_id == company.id|stringformat:"s" %}selected{% endif %}>{{ company.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Filter by Year Range -->
+            <div class="col-md-6">
+                <label class="form-label">Release Year Range</label>
+                <div class="input-group">
+                    <input type="number" name="start_year" value="{{ start_year|default:'' }}" placeholder="From Year" class="form-control">
+                    <span class="input-group-text">-</span>
+                    <input type="number" name="end_year" value="{{ end_year|default:'' }}" placeholder="To Year" class="form-control">
+                </div>
+            </div>
+
+            <!-- Filter by Starting Letter -->
+            <div class="col-md-6">
+                 <label class="form-label">Starting Letter</label>
+                 <select name="letter" class="form-select">
+                     <option value="">All Letters</option>
+                     {% for char in alphabet %}
+                         <option value="{{ char }}" {% if letter == char %}selected{% endif %}>{{ char }}</option>
+                     {% endfor %}
+                 </select>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="mt-3 d-flex justify-content-end gap-2">
+             <a href="{% url 'tv_shows' %}" class="btn btn-secondary">Reset Filters</a>
+             <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </div>
+    </form>
+    <!-- End Search, Sort, Filter Form -->
+
+     <!-- Results Count -->
+    <p class="text-muted mb-3">{{ tv_shows.paginator.count }} TV Show{{ tv_shows.paginator.count|pluralize }} found.</p>
+
+    <!-- No TV Shows Found Message -->
+    {% if not tv_shows %}
+         <div class="alert alert-warning text-center" role="alert">
+             No TV shows match your criteria. Try adjusting the filters.
+         </div>
+    {% else %}
+        <!-- TV Shows Grid -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+             {% for tv_show in tv_shows %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                     <a href="{% url 'tv_show_detail' tv_show.get_slug %}">
+                         {% if tv_show.poster_image %}
+                            <img src="{{ tv_show.poster_image.url }}" class="card-img-top movie-image" alt="{{ tv_show.title }}">
+                         {% else %}
+                            <img src="{% static 'images/placeholder.png' %}" class="card-img-top movie-image" alt="Placeholder">
+                         {% endif %}
+                     </a>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ tv_show.title }}</h5>
+                        <p class="card-text"><small class="text-muted">Released: {{ tv_show.release_year }}</small></p>
+                         <p class="card-text flex-grow-1">{{ tv_show.description|truncatewords:15 }}</p>
+                        <a href="{% url 'tv_show_detail' tv_show.get_slug %}" class="btn btn-outline-primary mt-auto align-self-start">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- End TV Shows Grid -->
+
+        <!-- Pagination (Identical to movies.html) -->
+        {% if tv_shows.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if tv_shows.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ tv_shows.previous_page_number }}&{{ request.GET.urlencode | cut:'page=' | cut:tv_shows.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                {% endif %}
+                {% for num in tv_shows.paginator.page_range %}
+                    {% if tv_shows.number == num %}
+                        <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > tv_shows.number|add:'-3' and num < tv_shows.number|add:'3' %}
+                         <li class="page-item"><a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode | cut:'page=' | cut:num }}">{{ num }}</a></li>
+                     {% elif num == 1 or num == tv_shows.paginator.num_pages %}
+                         {% if num == 1 and tv_shows.number > 4 %}
+                             <li class="page-item disabled"><span class="page-link">...</span></li>
+                         {% elif num == tv_shows.paginator.num_pages and tv_shows.number < tv_shows.paginator.num_pages|add:'-3' %}
+                              <li class="page-item disabled"><span class="page-link">...</span></li>
+                         {% endif %}
+                         {% if num == 1 or num == tv_shows.paginator.num_pages %}
+                              <li class="page-item"><a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode | cut:'page=' | cut:num }}">{{ num }}</a></li>
+                         {% endif %}
+                     {% endif %}
+                {% endfor %}
+                {% if tv_shows.has_next %}
+                    <li class="page-item">
+                         <a class="page-link" href="?page={{ tv_shows.next_page_number }}&{{ request.GET.urlencode | cut:'page=' | cut:tv_shows.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        <!-- End Pagination -->
+    {% endif %} {# End check if tv_shows exist #}
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            {% if movie.poster_image %}
+                <img src="{{ movie.poster_image.url }}" alt="{{ movie.title }}" class="img-fluid rounded clickable-image" onclick="openModal('{{ movie.poster_image.url }}')">
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h1>{{ movie.title }}</h1>
+            <p><strong>Original Title:</strong> {{ movie.original_title }}</p>
+            <p>{{ movie.description }}</p>
+            <p><strong>Release Year:</strong> {{ movie.release_year }}</p>
+            {% if movie.dubbing_company %}
+            <p><strong>Dubbing Company:</strong>
+              <a href="{% url 'dubbing_company_detail' movie.dubbing_company.pk %}">
+                {{ movie.dubbing_company.name }}
+              </a>
+            </p>
+          {% endif %}
+        </div>
+    </div>
+
+    <!-- Voice Actors Section -->
+    <hr>
+    <h5>Croatian Voice Actors:</h5>
+    <ul class="list-group">
+        {% for role in movie.roles.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                {% if role.voice_actor.photo %}
+                    <img src="{{ role.voice_actor.photo.url }}" alt="{{ role.voice_actor.name }}" width="50" height="50" class="rounded-circle clickable-image actor-img me-3" onclick="openModal('{{ role.voice_actor.photo.url }}')">
+                {% else %}
+                    <img src="{% static 'images/placeholder.png' %}" alt="{{ actor.name }}" style="width: 50px; height: 50px;" class="rounded-circle clickable-image actor-img me-3">
+                {% endif %}
+                    <a href="{% url 'actor_detail' role.voice_actor.pk %}" class="me-2" style="text-decoration: none;">{{ role.voice_actor.name }}</a>
+                    <span class="as-text ms-2"><strong>as</strong></span>&nbsp;&nbsp;&nbsp;
+                    <span>{{ role.character_name }}</span>
+                    {% if role.character_image %}
+                        <a href="{{ role.character_image.url }}" target="_blank">
+                            <img src="{{ role.character_image.url }}" alt="{{ role.character_name }}" width="50" height="50" class="rounded-circle ms-3 clickable-image">
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Social Media Icons for Voice Actor -->
+                <div class="social-links ms-auto">
+                    {% if role.voice_actor.instagram %}
+                        <a href="{{ role.voice_actor.instagram }}" target="_blank" class="social-icon">
+                            <img src="{% static 'images/instagram.png' %}" alt="Instagram" width="24">
+                        </a>
+                    {% endif %}
+                    {% if role.voice_actor.facebook %}
+                        <a href="{{ role.voice_actor.facebook }}" target="_blank" class="social-icon">
+                            <img src="{% static 'images/facebook.png' %}" alt="Facebook" width="24">
+                        </a>
+                    {% endif %}
+                    {% if role.voice_actor.x %}
+                        <a href="{{ role.voice_actor.x }}" target="_blank" class="social-icon">
+                            <img src="{% static 'images/x.png' %}" alt="X" width="24">
+                        </a>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Modal for Image Popup -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <!-- Modal Functionality -->
+    <script>
+        var modal = document.getElementById("imageModal");
+        var modalImg = document.getElementById("modalImage");
+        var closeBtn = document.getElementsByClassName("close")[0];
+
+        function openModal(src) {
+            modal.style.display = "block";
+            modalImg.src = src;
+        }
+
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        };
+
+        modal.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+    </script>
+</div>
+{% endblock %}

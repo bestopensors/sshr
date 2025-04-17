@@ -1,0 +1,174 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.card img {
+    height: 300px;
+    object-fit: cover;
+}
+
+.card-title {
+    font-size: 1.25rem;
+}
+
+footer {
+    font-size: 0.9rem;
+}
+
+.list-group-item .d-flex {
+    flex-grow: 1;
+}
+
+.list-group-item .social-links {
+    margin-left: auto; /* Align social media icons to the right */
+}
+
+.list-group-item span.ms-2 {
+    margin-left: 10px;
+ }
+ 
+ .card h2 {
+    font-size: 1.5rem;
+}
+
+.card h5 {
+    font-size: 1.25rem;
+}
+
+.card ul {
+    padding-left: 20px;
+}
+
+.card ul li {
+    margin-bottom: 5px;
+}
+
+.movie-image {
+    height: 300px; /* Set a consistent height */
+    object-fit: cover; /* Ensure images maintain their aspect ratio */
+}
+
+.card {
+    border-radius: 10px; /* Add rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+select.form-control {
+    height: calc(2.25rem + 2px);
+}
+
+.pagination .active .page-link {
+    background-color: #007bff;
+    color: white;
+}
+
+.pagination .page-link {
+    color: #007bff;
+}
+
+.pagination .page-link:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+/* Hover effect for images */
+.actor-img, .movie-poster {
+    transition: transform 0.3s ease;
+}
+
+.actor-img:hover, .movie-poster:hover {
+    transform: scale(1.1);
+}
+
+/* Social media icons alignment and hover effect */
+.social-links {
+    display: flex;
+    gap: 10px;
+}
+
+.social-links a {
+    transition: transform 0.2s ease-in-out;
+}
+
+.social-links a:hover {
+    transform: scale(1.2);
+}
+
+/* Modal styling */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000; /* Sit on top */
+    padding-top: 60px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.9); /* Black background with transparency */
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 30%;
+}
+
+.close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+}
+
+/* Animation for modal content */
+.modal-content {
+    animation-name: zoomIn;
+    animation-duration: 0.5s;
+}
+
+@keyframes zoomIn {
+    from {transform: scale(0)}
+    to {transform: scale(1)}
+}
+
+/* Hover effect for clickable images */
+.clickable-image {
+    transition: transform 0.3s ease;
+}
+
+.clickable-image:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+.sort-button {
+    margin-bottom: 15px;
+}
+
+/* Social Media Icons Hover Effect */
+ul img:hover {
+    transform: scale(1.2);
+}
+
+
+/* Navbar Styling */
+.navbar-brand {
+    font-weight: bold;
+}
+
+footer {
+    font-size: 0.9rem;
+}
