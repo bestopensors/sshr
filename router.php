@@ -7,46 +7,97 @@
 $uri = $_SERVER['REQUEST_URI'];
 $path = parse_url($uri, PHP_URL_PATH);
 
-// Remove query string
-$path = strtok($path, '?');
+// Normalize path
+$path = '/' . trim($path, '/');
 
-// Get the file path
-$filePath = __DIR__ . $path;
+// List of valid pages
+$validPages = [
+    '/' => '/index.php',
+    '/index' => '/index.php',
+    '/index.php' => '/index.php',
+    '/about' => '/about.php',
+    '/about.php' => '/about.php',
+    '/privacy' => '/privacy.php',
+    '/privacy.php' => '/privacy.php',
+    '/terms' => '/terms.php',
+    '/terms.php' => '/terms.php',
+    '/contact-handler.php' => '/contact-handler.php',
+    '/404' => '/404.php',
+    '/404.php' => '/404.php',
+];
 
-// Check if it's a directory, try index.php
-if (is_dir($filePath)) {
-    $filePath = rtrim($filePath, '/') . '/index.php';
-}
+// Check for static files (css, js, images, etc.)
+$staticExtensions = ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf', 'eot'];
+$ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
-// If file exists, serve it
-if (file_exists($filePath) && is_file($filePath)) {
-    // Check if it's a PHP file
-    if (pathinfo($filePath, PATHINFO_EXTENSION) === 'php') {
-        include $filePath;
-        return true;
+if (in_array($ext, $staticExtensions)) {
+    $filePath = __DIR__ . $path;
+    if (file_exists($filePath)) {
+        return false; // Let PHP serve the static file
     }
-    // Let the built-in server handle static files
-    return false;
-}
-
-// Try adding .php extension
-$phpFile = __DIR__ . rtrim($path, '/') . '.php';
-if (file_exists($phpFile)) {
-    include $phpFile;
+    // Static file not found - still 404
+    include __DIR__ . '/404.php';
     return true;
 }
 
-// Try .html to .php redirect
+// Check for admin pages
+if (strpos($path, '/admin') === 0) {
+    $adminPath = $path;
+    
+    // Handle /admin or /admin/
+    if ($adminPath === '/admin' || $adminPath === '/admin/') {
+        include __DIR__ . '/admin/index.php';
+        return true;
+    }
+    
+    // Try exact match
+    $filePath = __DIR__ . $adminPath;
+    if (file_exists($filePath) && is_file($filePath)) {
+        if (pathinfo($filePath, PATHINFO_EXTENSION) === 'php') {
+            include $filePath;
+            return true;
+        }
+        return false;
+    }
+    
+    // Try adding .php
+    $phpFile = __DIR__ . rtrim($adminPath, '/') . '.php';
+    if (file_exists($phpFile)) {
+        include $phpFile;
+        return true;
+    }
+    
+    // Admin 404
+    include __DIR__ . '/404.php';
+    return true;
+}
+
+// Check valid pages
+if (isset($validPages[$path])) {
+    include __DIR__ . $validPages[$path];
+    return true;
+}
+
+// Handle .html to .php redirect
 if (substr($path, -5) === '.html') {
     $phpPath = substr($path, 0, -5) . '.php';
-    $phpFile = __DIR__ . $phpPath;
-    if (file_exists($phpFile)) {
+    if (isset($validPages[$phpPath])) {
         header('Location: ' . $phpPath, true, 301);
         return true;
     }
 }
 
-// 404 - Page not found
+// Check if it's a directory with index
+$dirPath = __DIR__ . $path;
+if (is_dir($dirPath)) {
+    $indexFile = rtrim($dirPath, '/') . '/index.php';
+    if (file_exists($indexFile)) {
+        include $indexFile;
+        return true;
+    }
+}
+
+// Nothing matched - 404
+http_response_code(404);
 include __DIR__ . '/404.php';
 return true;
-
