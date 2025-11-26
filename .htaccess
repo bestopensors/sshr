@@ -1,0 +1,45 @@
+# Start Smart HR - Apache Configuration
+
+# Enable rewrite engine
+RewriteEngine On
+
+# Custom 404 error page
+ErrorDocument 404 /404.php
+
+# Redirect .html to .php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)\.html$ $1.php [L,R=301]
+
+# Protect config directory
+<IfModule mod_rewrite.c>
+    RewriteRule ^config/ - [F,L]
+    RewriteRule ^install/ - [F,L]
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Enable compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
+</IfModule>
+
+# Cache static files
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+</IfModule>
+
