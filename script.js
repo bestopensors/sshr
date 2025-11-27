@@ -239,18 +239,44 @@ class PortfolioApp {
         }
 
         if (isValid) {
-          // Show success message
-          showSuccessMessage();
-          form.reset();
-          // Reset Turnstile
-          if (typeof window.turnstileWidgetId !== 'undefined' && window.turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
-            turnstile.reset(window.turnstileWidgetId);
-            turnstileValid = false;
-            turnstileToken = null;
-          }
-          // Reset all form groups to unfocused state
-          document.querySelectorAll('.form__group').forEach(group => {
-            group.classList.remove('form__group--focused');
+          // Submit form data to server
+          const formData = new FormData(form);
+          formData.append('cf-turnstile-response', turnstileToken || '');
+          
+          // Disable submit button
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn) submitBtn.disabled = true;
+          
+          fetch('contact-handler.php', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              showSuccessMessage();
+              form.reset();
+              // Reset Turnstile
+              if (typeof window.turnstileWidgetId !== 'undefined' && window.turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+                turnstile.reset(window.turnstileWidgetId);
+                turnstileValid = false;
+                turnstileToken = null;
+              }
+              // Reset all form groups to unfocused state
+              document.querySelectorAll('.form__group').forEach(group => {
+                group.classList.remove('form__group--focused');
+              });
+            } else {
+              showErrorMessage();
+              console.error('Form submission failed:', data);
+            }
+          })
+          .catch(error => {
+            showErrorMessage();
+            console.error('Form submission error:', error);
+          })
+          .finally(() => {
+            if (submitBtn) submitBtn.disabled = false;
           });
         } else {
           // Show error message

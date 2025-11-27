@@ -13,7 +13,16 @@ define('DB_CHARSET', 'utf8mb4');
 // Site settings
 define('SITE_URL', 'startsmarthr.eu');
 define('SITE_NAME', 'Start Smart HR');
-define('ADMIN_EMAIL', 'info@startsmarthr.eu');
+define('ADMIN_EMAIL', 'contact@startsmarthr.eu');
+
+// Email settings for Infonet SMTP
+define('SMTP_HOST', 'cp7.infonet.hr');
+define('SMTP_PORT', 465);
+define('SMTP_USER', 'contact@startsmarthr.eu');
+define('SMTP_PASS', '9v3)M2pv*tY4');
+define('SMTP_FROM', 'contact@startsmarthr.eu');
+define('SMTP_FROM_NAME', 'Start Smart HR');
+define('SMTP_SECURE', 'ssl');
 
 // Session settings
 define('SESSION_LIFETIME', 3600); // 1 hour
