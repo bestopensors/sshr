@@ -2,6 +2,46 @@
 /**
  * Admin - Live Chat Management
  */
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/auth.php';
+requireAuth();
+
+// Handle send message BEFORE any output
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && isset($_POST['conversation_id'])) {
+    $convId = (int)$_POST['conversation_id'];
+    $message = trim($_POST['message']);
+    
+    if ($convId && $message && dbAvailable()) {
+        try {
+            $stmt = db()->prepare("INSERT INTO chat_messages (conversation_id, sender_type, message) VALUES (?, 'admin', ?)");
+            $stmt->execute([$convId, $message]);
+            
+            $stmt = db()->prepare("UPDATE chat_conversations SET updated_at = NOW() WHERE id = ?");
+            $stmt->execute([$convId]);
+            
+            header("Location: chat.php?id=$convId");
+            exit;
+        } catch (Exception $e) {
+            // Error
+        }
+    }
+}
+
+// Handle close conversation
+if (isset($_GET['close'])) {
+    $convId = (int)$_GET['close'];
+    if ($convId && dbAvailable()) {
+        try {
+            $stmt = db()->prepare("UPDATE chat_conversations SET status = 'closed' WHERE id = ?");
+            $stmt->execute([$convId]);
+            header("Location: chat.php");
+            exit;
+        } catch (Exception $e) {
+            // Error
+        }
+    }
+}
+
 $pageTitle = 'Live Chat';
 require_once 'includes/header.php';
 
@@ -51,41 +91,6 @@ if (dbAvailable()) {
     }
 }
 
-// Handle send message
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && isset($_POST['conversation_id'])) {
-    $convId = (int)$_POST['conversation_id'];
-    $message = trim($_POST['message']);
-    
-    if ($convId && $message && dbAvailable()) {
-        try {
-            $stmt = db()->prepare("INSERT INTO chat_messages (conversation_id, sender_type, message) VALUES (?, 'admin', ?)");
-            $stmt->execute([$convId, $message]);
-            
-            $stmt = db()->prepare("UPDATE chat_conversations SET updated_at = NOW() WHERE id = ?");
-            $stmt->execute([$convId]);
-            
-            header("Location: chat.php?id=$convId");
-            exit;
-        } catch (Exception $e) {
-            // Error
-        }
-    }
-}
-
-// Handle close conversation
-if (isset($_GET['close'])) {
-    $convId = (int)$_GET['close'];
-    if ($convId && dbAvailable()) {
-        try {
-            $stmt = db()->prepare("UPDATE chat_conversations SET status = 'closed' WHERE id = ?");
-            $stmt->execute([$convId]);
-            header("Location: chat.php");
-            exit;
-        } catch (Exception $e) {
-            // Error
-        }
-    }
-}
 ?>
 
 <style>
@@ -217,8 +222,9 @@ if (isset($_GET['close'])) {
 
 .chat-msg--visitor {
     align-self: flex-start;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: #e5e7eb;
+    color: #1f2937;
+    border: none;
 }
 
 .chat-msg--admin {
@@ -343,10 +349,33 @@ if (isset($_GET['close'])) {
                 const msgContainer = document.getElementById('chat-messages');
                 msgContainer.scrollTop = msgContainer.scrollHeight;
                 
-                // Auto-refresh every 5 seconds
-                setTimeout(function() {
-                    location.reload();
-                }, 5000);
+                // Poll for new messages without page refresh
+                const conversationId = <?php echo $activeConversation['id']; ?>;
+                let lastMsgId = <?php echo !empty($messages) ? end($messages)['id'] : 0; ?>;
+                
+                async function checkNewMessages() {
+                    try {
+                        const response = await fetch('../chat-api.php?action=get&conversation_id=' + conversationId + '&last_id=' + lastMsgId + '&mark_read=admin');
+                        const data = await response.json();
+                        
+                        if (data.success && data.messages.length > 0) {
+                            data.messages.forEach(msg => {
+                                if (msg.sender_type === 'visitor') {
+                                    const div = document.createElement('div');
+                                    div.className = 'chat-msg chat-msg--visitor';
+                                    div.innerHTML = msg.message + '<div class="chat-msg-time">' + new Date(msg.created_at).toLocaleTimeString('hr-HR', {hour: '2-digit', minute: '2-digit'}) + '</div>';
+                                    msgContainer.appendChild(div);
+                                    msgContainer.scrollTop = msgContainer.scrollHeight;
+                                }
+                                lastMsgId = Math.max(lastMsgId, parseInt(msg.id));
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Poll error:', e);
+                    }
+                }
+                
+                setInterval(checkNewMessages, 3000);
             </script>
         <?php else: ?>
             <div class="chat-empty">

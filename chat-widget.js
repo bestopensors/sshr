@@ -83,7 +83,7 @@
             if (data.success) {
                 conversationId = data.conversation_id;
                 localStorage.setItem('chat_conversation_id', conversationId);
-                loadMessages();
+                loadAllMessages();
                 startPolling();
             }
         } catch (error) {
@@ -102,8 +102,31 @@
 
             if (data.success && data.messages.length > 0) {
                 data.messages.forEach(msg => {
+                    // Only append admin messages during polling (visitor messages added on send)
+                    if (msg.sender_type === 'admin') {
+                        appendMessage(msg);
+                    }
+                    lastMessageId = Math.max(lastMessageId, parseInt(msg.id));
+                });
+                scrollToBottom();
+            }
+        } catch (error) {
+            console.error('Load messages error:', error);
+        }
+    }
+    
+    // Initial load - get all messages
+    async function loadAllMessages() {
+        if (!conversationId) return;
+
+        try {
+            const response = await fetch(`${API_URL}?action=get&conversation_id=${conversationId}&last_id=0`);
+            const data = await response.json();
+
+            if (data.success && data.messages.length > 0) {
+                data.messages.forEach(msg => {
                     appendMessage(msg);
-                    lastMessageId = Math.max(lastMessageId, msg.id);
+                    lastMessageId = Math.max(lastMessageId, parseInt(msg.id));
                 });
                 scrollToBottom();
             }
@@ -160,13 +183,15 @@
             const data = await response.json();
 
             if (data.success) {
+                // Update lastMessageId to skip this message in polling
+                lastMessageId = Math.max(lastMessageId, data.message_id);
+                
                 appendMessage({
                     id: data.message_id,
                     sender_type: 'visitor',
                     message: message,
                     created_at: new Date().toISOString()
                 });
-                lastMessageId = Math.max(lastMessageId, data.message_id);
                 scrollToBottom();
             }
         } catch (error) {
