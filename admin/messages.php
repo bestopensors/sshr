@@ -95,10 +95,12 @@ if (dbAvailable()) {
                     <?php foreach ($messages as $msg): ?>
                     <tr style="<?php echo !$msg['is_read'] ? 'background: rgba(99, 102, 241, 0.05);' : ''; ?>">
                         <td>
-                            <?php if (!$msg['is_read']): ?>
+                            <?php if (isset($msg['is_replied']) && $msg['is_replied']): ?>
+                                <span class="badge badge--success">Odgovoreno</span>
+                            <?php elseif (!$msg['is_read']): ?>
                                 <span class="badge badge--warning">Nova</span>
                             <?php else: ?>
-                                <span class="badge badge--success">Pročitana</span>
+                                <span class="badge badge--secondary">Pročitana</span>
                             <?php endif; ?>
                         </td>
                         <td><strong><?php echo htmlspecialchars($msg['name']); ?></strong></td>
