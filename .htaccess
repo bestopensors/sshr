@@ -1,12 +1,18 @@
 # Start Smart HR - Apache Configuration
 
+# Set default index file (prioritize PHP over HTML)
+DirectoryIndex index.php index.html
+
 # Enable rewrite engine
 RewriteEngine On
 
 # Custom 404 error page
 ErrorDocument 404 /404.php
 
-# Redirect .html to .php
+# Redirect index.html to index.php (to use database-driven content)
+RewriteRule ^index\.html$ index.php [L,R=301]
+
+# Redirect .html to .php (for other pages)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)\.html$ $1.php [L,R=301]

@@ -14,19 +14,26 @@ if (dbAvailable()) {
         
         // Load features and details for each package
         foreach ($packages as $pkg) {
-            $stmt = db()->prepare("SELECT * FROM package_features WHERE package_id = ? ORDER BY sort_order ASC");
-            $stmt->execute([$pkg['id']]);
-            $packageFeatures[$pkg['id']] = $stmt->fetchAll();
+            $packageId = (int)$pkg['id'];
             
-            $stmt = db()->prepare("SELECT * FROM package_details WHERE package_id = ? ORDER BY sort_order ASC");
-            $stmt->execute([$pkg['id']]);
-            $packageDetails[$pkg['id']] = $stmt->fetchAll();
+            // Load features
+            $stmt = db()->prepare("SELECT * FROM package_features WHERE package_id = ? ORDER BY sort_order ASC");
+            $stmt->execute([$packageId]);
+            $packageFeatures[$packageId] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Load details
+            $stmt = db()->prepare("SELECT id, package_id, detail_hr, detail_en, sort_order FROM package_details WHERE package_id = ? ORDER BY sort_order ASC");
+            $stmt->execute([$packageId]);
+            $detailsResult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $packageDetails[$packageId] = $detailsResult;
         }
         
         // Load optional services
         $stmt = db()->query("SELECT * FROM optional_services WHERE active = 1 ORDER BY sort_order ASC");
         $optionalServices = $stmt->fetchAll();
     } catch (Exception $e) {
+        // Log error for debugging (remove in production)
+        error_log("Package loading error: " . $e->getMessage());
         // Use empty arrays as fallback
     }
 }
@@ -36,12 +43,131 @@ if (dbAvailable()) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-translate="page-title-home">Start Smart HR - Moderan Web Design</title>
+  
+  <!-- Primary Meta Tags -->
+  <title>Start Smart HR - Profesionalni Web Dizajn i Razvoj Web Stranica | Zagreb, Hrvatska</title>
+  <meta name="title" content="Start Smart HR - Profesionalni Web Dizajn i Razvoj Web Stranica | Zagreb, Hrvatska">
+  <meta name="description" content="Start Smart HR - Profesionalna izrada web stranica u Zagrebu. Moderan web dizajn, brza izrada, SEO optimizacija. Kontaktirajte nas za besplatnu ponudu!">
+  <meta name="keywords" content="Start Smart HR, web dizajn Zagreb, izrada web stranica, web development Hrvatska, SEO optimizacija, responzivni web dizajn, profesionalni web dizajn">
+  <meta name="author" content="Start Smart HR">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="Croatian">
+  <meta name="revisit-after" content="7 days">
+  <link rel="canonical" href="https://startsmarthr.eu/">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://startsmarthr.eu/">
+  <meta property="og:title" content="Start Smart HR - Profesionalni Web Dizajn i Razvoj Web Stranica">
+  <meta property="og:description" content="Start Smart HR - Profesionalna izrada web stranica u Zagrebu. Moderan web dizajn, brza izrada, SEO optimizacija. Kontaktirajte nas za besplatnu ponudu!">
+  <meta property="og:image" content="https://startsmarthr.eu/images/first.png">
+  <meta property="og:site_name" content="Start Smart HR">
+  <meta property="og:locale" content="hr_HR">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://startsmarthr.eu/">
+  <meta property="twitter:title" content="Start Smart HR - Profesionalni Web Dizajn i Razvoj Web Stranica">
+  <meta property="twitter:description" content="Start Smart HR - Profesionalna izrada web stranica u Zagrebu. Moderan web dizajn, brza izrada, SEO optimizacija.">
+  <meta property="twitter:image" content="https://startsmarthr.eu/images/first.png">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/SSHR.png">
+  
+  <!-- Preconnect for Performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Start Smart HR",
+    "alternateName": "Start Smart",
+    "url": "https://startsmarthr.eu",
+    "logo": "https://startsmarthr.eu/images/SSHR.png",
+    "description": "Start Smart HR - Profesionalna izrada web stranica u Zagrebu. Moderan web dizajn, brza izrada, SEO optimizacija.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Seljine Brigade 72",
+      "addressLocality": "Velika Gorica",
+      "addressRegion": "Zagreb",
+      "addressCountry": "HR"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+385-99-610-5673",
+      "contactType": "customer service",
+      "email": "contact@startsmarthr.eu",
+      "availableLanguage": ["hr", "en"]
+    },
+    "sameAs": [
+      "https://www.facebook.com/people/Start-Smart-HR/61581505773838/",
+      "https://www.instagram.com/startsmarthr.eu/"
+    ],
+    "areaServed": {
+      "@type": "Country",
+      "name": "Croatia"
+    },
+    "serviceType": "Web Design and Development"
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Start Smart HR",
+    "url": "https://startsmarthr.eu",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://startsmarthr.eu/?s={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Start Smart HR",
+    "image": "https://startsmarthr.eu/images/first.png",
+    "@id": "https://startsmarthr.eu",
+    "url": "https://startsmarthr.eu",
+    "telephone": "+385996105673",
+    "priceRange": "€€",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Seljine Brigade 72",
+      "addressLocality": "Velika Gorica",
+      "addressRegion": "Zagreb",
+      "postalCode": "10410",
+      "addressCountry": "HR"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 45.7125,
+      "longitude": 16.0756
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "opens": "09:00",
+      "closes": "17:00"
+    }
+  }
+  </script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script>
     // Cloudflare Turnstile configuration
@@ -365,8 +491,9 @@ if (dbAvailable()) {
             elseif ($pkg['badge_type'] === 'custom') $badgeClass = 'package-card__badge--custom';
             
             $image = !empty($pkg['image']) ? $pkg['image'] : 'images/comingsoon.jpg';
-            $features = $packageFeatures[$pkg['id']] ?? [];
-            $details = $packageDetails[$pkg['id']] ?? [];
+            $packageId = (int)$pkg['id'];
+            $features = $packageFeatures[$packageId] ?? [];
+            $details = $packageDetails[$packageId] ?? [];
         ?>
         <div class="package-card <?php echo $isFeatured ? 'package-card--featured' : ''; ?>">
           <?php if ($pkg['show_discount'] && $pkg['price'] && $pkg['original_price']): ?>
@@ -462,14 +589,27 @@ if (dbAvailable()) {
               <div class="details">
                 <h4 class="details__title" data-translate="details-title">Dodatni detalji:</h4>
                 <ul class="details__list">
-                  <?php if (!empty($details)): ?>
-                    <?php foreach ($details as $detail): ?>
+                  <?php 
+                  $hasValidDetails = false;
+                  if (!empty($details) && is_array($details)): 
+                    foreach ($details as $detail): 
+                      // Display detail if either language has content
+                      $detailHr = trim($detail['detail_hr'] ?? '');
+                      $detailEn = trim($detail['detail_en'] ?? '');
+                      if (!empty($detailHr) || !empty($detailEn)): 
+                        $hasValidDetails = true;
+                  ?>
                     <li>
-                      <span data-lang-hr><?php echo htmlspecialchars($detail['detail_hr']); ?></span>
-                      <span data-lang-en style="display:none;"><?php echo htmlspecialchars($detail['detail_en']); ?></span>
+                      <span data-lang-hr><?php echo htmlspecialchars($detailHr); ?></span>
+                      <span data-lang-en style="display:none;"><?php echo htmlspecialchars($detailEn); ?></span>
                     </li>
-                    <?php endforeach; ?>
-                  <?php else: ?>
+                  <?php 
+                      endif;
+                    endforeach; 
+                  endif;
+                  
+                  if (!$hasValidDetails):
+                  ?>
                     <li>
                       <span data-lang-hr>Nema dodatnih detalja</span>
                       <span data-lang-en style="display:none;">No additional details</span>
@@ -891,5 +1031,6 @@ if (dbAvailable()) {
   <!-- JavaScript Section -->
   <script src="script.js"></script>
   <script src="chat-widget.js"></script>
+  <script src="analytics-alternative.js"></script>
 </body>
 </html>

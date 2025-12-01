@@ -99,18 +99,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && dbAvailable()) {
             }
         }
         
-        // Handle details
-        if (isset($_POST['details_hr']) && is_array($_POST['details_hr'])) {
+        // Handle details - always process if details_hr is set (even if empty array)
+        if (isset($_POST['details_hr'])) {
+            // Delete all existing details for this package
             $stmt = db()->prepare("DELETE FROM package_details WHERE package_id = ?");
             $stmt->execute([$id]);
             
-            $detailsHr = $_POST['details_hr'];
-            $detailsEn = $_POST['details_en'] ?? [];
-            
-            for ($i = 0; $i < count($detailsHr); $i++) {
-                if (!empty(trim($detailsHr[$i]))) {
-                    $stmt = db()->prepare("INSERT INTO package_details (package_id, detail_hr, detail_en, sort_order) VALUES (?, ?, ?, ?)");
-                    $stmt->execute([$id, trim($detailsHr[$i]), trim($detailsEn[$i] ?? ''), $i]);
+            // Insert new details if provided
+            if (is_array($_POST['details_hr'])) {
+                $detailsHr = $_POST['details_hr'];
+                $detailsEn = $_POST['details_en'] ?? [];
+                $sortOrder = 0;
+                
+                for ($i = 0; $i < count($detailsHr); $i++) {
+                    $detailHr = trim($detailsHr[$i] ?? '');
+                    $detailEn = trim($detailsEn[$i] ?? '');
+                    
+                    // Only insert if at least one language has content
+                    if (!empty($detailHr) || !empty($detailEn)) {
+                        $stmt = db()->prepare("INSERT INTO package_details (package_id, detail_hr, detail_en, sort_order) VALUES (?, ?, ?, ?)");
+                        $stmt->execute([$id, $detailHr, $detailEn, $sortOrder]);
+                        $sortOrder++;
+                    }
                 }
             }
         }
@@ -144,13 +154,13 @@ if (!dbAvailable()) {
             $package = $stmt->fetch();
             
             if ($package) {
-                $stmt = db()->prepare("SELECT * FROM package_features WHERE package_id = ? ORDER BY sort_order");
+                $stmt = db()->prepare("SELECT * FROM package_features WHERE package_id = ? ORDER BY sort_order ASC");
                 $stmt->execute([$id]);
-                $features = $stmt->fetchAll();
+                $features = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
-                $stmt = db()->prepare("SELECT * FROM package_details WHERE package_id = ? ORDER BY sort_order");
+                $stmt = db()->prepare("SELECT * FROM package_details WHERE package_id = ? ORDER BY sort_order ASC");
                 $stmt->execute([$id]);
-                $details = $stmt->fetchAll();
+                $details = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         } catch (Exception $e) {
             $error = 'Greška pri učitavanju paketa.';
