@@ -415,6 +415,22 @@ textarea.form-control {
     color: var(--danger);
 }
 
+/* DateTime Local Input Styling - White Calendar Icon */
+input[type="datetime-local"] {
+    color-scheme: dark;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 1;
+}
+
+input[type="datetime-local"]::-webkit-inner-spin-button,
+input[type="datetime-local"]::-webkit-clear-button {
+    filter: invert(1);
+}
+
 /* Alerts */
 .alert {
     padding: 16px 20px;

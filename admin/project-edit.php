@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && dbAvailable()) {
         $agreementDate = $_POST['agreement_date'] ?? '';
         $deadline = $_POST['deadline'] ?? '';
         $status = sanitize($_POST['status'] ?? 'current');
-        $currentPhase = sanitize($_POST['current_phase'] ?? 'planning');
+        $currentPhase = sanitize($_POST['current_phase'] ?? 'agreement');
         $notes = sanitize(trim($_POST['notes'] ?? ''));
         
         // Validate required fields
@@ -27,29 +27,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && dbAvailable()) {
             throw new Exception('Ime projekta, datum sporazuma i rok su obavezni.');
         }
         
+        // Handle agreement status and meeting
+        $hasAgreement = isset($_POST['has_agreement']) ? 1 : 0;
+        $meetingDate = !empty($_POST['meeting_date']) ? $_POST['meeting_date'] : null;
+        
         // Insert or update project
         if ($id > 0) {
-            $stmt = db()->prepare("UPDATE projects SET name = ?, client_name = ?, client_email = ?, package_type = ?, agreement_date = ?, deadline = ?, status = ?, current_phase = ?, notes = ? WHERE id = ?");
-            $stmt->execute([$name, $clientName, $clientEmail, $packageType, $agreementDate, $deadline, $status, $currentPhase, $notes, $id]);
+            $stmt = db()->prepare("UPDATE projects SET name = ?, client_name = ?, client_email = ?, package_type = ?, agreement_date = ?, deadline = ?, status = ?, current_phase = ?, notes = ?, has_agreement = ?, meeting_date = ? WHERE id = ?");
+            $stmt->execute([$name, $clientName, $clientEmail, $packageType, $agreementDate, $deadline, $status, $currentPhase, $notes, $hasAgreement, $meetingDate, $id]);
         } else {
-            $stmt = db()->prepare("INSERT INTO projects (name, client_name, client_email, package_type, agreement_date, deadline, status, current_phase, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$name, $clientName, $clientEmail, $packageType, $agreementDate, $deadline, $status, $currentPhase, $notes]);
+            $stmt = db()->prepare("INSERT INTO projects (name, client_name, client_email, package_type, agreement_date, deadline, status, current_phase, notes, has_agreement, meeting_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$name, $clientName, $clientEmail, $packageType, $agreementDate, $deadline, $status, $currentPhase, $notes, $hasAgreement, $meetingDate]);
             $id = db()->lastInsertId();
         }
         
         // Handle phases
-        $phases = ['planning', 'design', 'development', 'content', 'testing', 'final'];
+        $phases = ['agreement', 'planning', 'design', 'development', 'content', 'testing', 'final'];
         
         // Delete existing phases
         $stmt = db()->prepare("DELETE FROM project_phases WHERE project_id = ?");
         $stmt->execute([$id]);
+        
+        // Handle meeting scheduling
+        if (!empty($meetingDate)) {
+            // Delete existing meetings for this project
+            $stmt = db()->prepare("DELETE FROM project_meetings WHERE project_id = ?");
+            $stmt->execute([$id]);
+            
+            // Insert new meeting
+            $stmt = db()->prepare("INSERT INTO project_meetings (project_id, meeting_date, meeting_type, notes) VALUES (?, ?, 'agreement', ?)");
+            $meetingNotes = sanitize(trim($_POST['meeting_notes'] ?? ''));
+            $stmt->execute([$id, $meetingDate, $meetingNotes]);
+        }
         
         // Insert phases with durations
         $startDate = new DateTime($agreementDate);
         foreach ($phases as $index => $phaseName) {
             $durationDays = (int)($_POST['phase_duration_' . $phaseName] ?? 0);
             
-            if ($durationDays > 0) {
+            if ($durationDays > 0 || $phaseName === 'agreement') {
                 $phaseStartDate = clone $startDate;
                 if ($index > 0) {
                     // Calculate start date based on previous phases
@@ -136,6 +152,15 @@ if ($id > 0 && dbAvailable()) {
                 }
                 $checklist[$item['phase_name']][] = $item;
             }
+            
+            // Load meeting
+            $stmt = db()->prepare("SELECT * FROM project_meetings WHERE project_id = ? ORDER BY meeting_date DESC LIMIT 1");
+            $stmt->execute([$id]);
+            $meeting = $stmt->fetch();
+            if ($meeting) {
+                $project['meeting_date'] = $meeting['meeting_date'];
+                $project['meeting_notes'] = $meeting['notes'];
+            }
         }
     } catch (Exception $e) {
         $error = 'Greška pri učitavanju projekta: ' . $e->getMessage();
@@ -152,12 +177,15 @@ if (!$project) {
         'agreement_date' => date('Y-m-d'),
         'deadline' => date('Y-m-d', strtotime('+30 days')),
         'status' => 'current',
-        'current_phase' => 'planning',
+        'current_phase' => 'agreement',
+        'has_agreement' => 0,
+        'meeting_date' => null,
         'notes' => ''
     ];
 }
 
 $phaseNames = [
+    'agreement' => 'Dogovor',
     'planning' => 'Planiranje',
     'design' => 'Dizajn',
     'development' => 'Razvoj',
@@ -211,8 +239,32 @@ $packageTypes = [
                 </div>
                 
                 <div class="form-group">
-                    <label for="client_email">Email klijenta</label>
-                    <input type="email" class="form-control" id="client_email" name="client_email" value="<?php echo htmlspecialchars($project['client_email']); ?>">
+                    <label for="client_email">Email klijenta (opcionalno)</label>
+                    <input type="email" class="form-control" id="client_email" name="client_email" value="<?php echo htmlspecialchars($project['client_email'] ?? ''); ?>">
+                </div>
+            </div>
+            
+            <!-- Agreement Status Section -->
+            <div style="padding: 20px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--primary);">
+                <h3 style="color: var(--primary); margin-bottom: 16px; font-size: 16px; font-weight: 600;">Status Dogovora</h3>
+                <div style="display: grid; gap: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 6px;">
+                        <input type="checkbox" name="has_agreement" value="1" <?php echo (isset($project['has_agreement']) && $project['has_agreement']) ? 'checked' : ''; ?>>
+                        <span style="color: var(--text-primary); font-weight: 500;">Sporazum je potpisan</span>
+                    </label>
+                    
+                    <div id="meeting-section" style="<?php echo (isset($project['has_agreement']) && $project['has_agreement']) ? 'display: none;' : ''; ?>">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 6px;">
+                            <div class="form-group">
+                                <label for="meeting_date" style="color: var(--text-primary); font-weight: 500; margin-bottom: 6px; display: block;">Datum i vrijeme sastanka</label>
+                                <input type="datetime-local" class="form-control" id="meeting_date" name="meeting_date" value="<?php echo isset($project['meeting_date']) && $project['meeting_date'] ? date('Y-m-d\TH:i', strtotime($project['meeting_date'])) : ''; ?>" style="background: var(--bg-dark); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-primary); color-scheme: dark;">
+                            </div>
+                            <div class="form-group">
+                                <label for="meeting_notes" style="color: var(--text-primary); font-weight: 500; margin-bottom: 6px; display: block;">Napomene o sastanku</label>
+                                <input type="text" class="form-control" id="meeting_notes" name="meeting_notes" value="<?php echo isset($project['meeting_notes']) ? htmlspecialchars($project['meeting_notes']) : ''; ?>" placeholder="Lokacija, tema, itd." style="background: var(--bg-dark); border: 1px solid rgba(255, 255, 255, 0.1);">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -263,6 +315,17 @@ $packageTypes = [
         </div>
         
         <div class="card__body">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: var(--primary); margin: 0; font-size: 18px;">Faze projekta</h3>
+                <?php if ($id > 0): ?>
+                <button type="button" class="btn btn--accent btn--sm" onclick="autopopulateChecklist(<?php echo $id; ?>, '<?php echo $project['package_type']; ?>')" id="autopopulate-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; vertical-align: middle;">
+                        <path d="M12 2v20M2 12h20"></path>
+                    </svg>
+                    Auto-popuni checklist
+                </button>
+                <?php endif; ?>
+            </div>
             <div style="display: grid; gap: 16px;">
                 <?php foreach ($phaseNames as $phaseKey => $phaseLabel): ?>
                 <div style="padding: 16px; background: var(--bg-input); border-radius: 8px;">
@@ -275,10 +338,10 @@ $packageTypes = [
                                    class="form-control" 
                                    id="phase_duration_<?php echo $phaseKey; ?>" 
                                    name="phase_duration_<?php echo $phaseKey; ?>" 
-                                   value="<?php echo isset($phases[$phaseKey]) ? $phases[$phaseKey]['duration_days'] : ''; ?>" 
+                                   value="<?php echo isset($phases[$phaseKey]) && $phases[$phaseKey]['duration_days'] > 0 ? $phases[$phaseKey]['duration_days'] : ''; ?>" 
                                    min="0" 
-                                   style="width: 80px;"
-                                   placeholder="dana">
+                                   style="width: 80px; background: var(--bg-dark); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-primary);"
+                                   placeholder="0">
                             <span style="color: var(--text-secondary); font-size: 14px;">dana</span>
                             <?php if (isset($phases[$phaseKey]) && $phases[$phaseKey]['completed']): ?>
                             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
@@ -346,6 +409,52 @@ function addChecklistItem(phaseKey) {
         <button type="button" class="btn btn--danger btn--sm" onclick="this.parentElement.remove()">×</button>
     `;
     container.appendChild(div);
+}
+
+// Toggle meeting section based on agreement checkbox
+document.addEventListener('DOMContentLoaded', function() {
+    const agreementCheckbox = document.querySelector('input[name="has_agreement"]');
+    const meetingSection = document.getElementById('meeting-section');
+    
+    if (agreementCheckbox && meetingSection) {
+        agreementCheckbox.addEventListener('change', function() {
+            meetingSection.style.display = this.checked ? 'none' : 'block';
+        });
+    }
+});
+
+// Auto-populate checklist function
+function autopopulateChecklist(projectId, tier) {
+    if (!confirm('Želite li automatski popuniti checklist za sve faze? Ovo će zamijeniti postojeće zadatke.')) {
+        return;
+    }
+    
+    const btn = document.getElementById('autopopulate-btn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Učitavanje...';
+    
+    fetch('project-autopopulate.php?project_id=' + projectId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Greška: ' + data.error);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                return;
+            }
+            
+            if (data.success) {
+                alert(data.message + ' (' + data.inserted + ' zadataka dodano)');
+                // Reload page to show new checklist items
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            alert('Greška pri učitavanju: ' + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
 }
 </script>
 

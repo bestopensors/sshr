@@ -34,10 +34,100 @@ if (isset($_GET['status']) && isset($_GET['id']) && dbAvailable()) {
         try {
             $stmt = db()->prepare("UPDATE projects SET status = ? WHERE id = ?");
             $stmt->execute([$status, $id]);
+            
+            // If marking as completed (past), mark the final phase as completed
+            if ($status === 'past') {
+                $stmt = db()->prepare("UPDATE project_phases SET completed = 1, completed_at = NOW() WHERE project_id = ? AND phase_name = 'final'");
+                $stmt->execute([$id]);
+                
+                // Also update project to final phase if not already
+                $stmt = db()->prepare("UPDATE projects SET current_phase = 'final' WHERE id = ?");
+                $stmt->execute([$id]);
+            }
+            
             $message = 'Status projekta ažuriran.';
         } catch (Exception $e) {
             $error = 'Greška pri ažuriranju statusa.';
         }
+    }
+}
+
+// Handle phase advancement
+if (isset($_GET['advance_phase']) && isset($_GET['id']) && dbAvailable()) {
+    $id = (int)$_GET['id'];
+    try {
+        // Get current project
+        $stmt = db()->prepare("SELECT * FROM projects WHERE id = ?");
+        $stmt->execute([$id]);
+        $project = $stmt->fetch();
+        
+        if ($project) {
+            $currentPhase = $project['current_phase'];
+            $phaseOrder = ['agreement', 'planning', 'design', 'development', 'content', 'testing', 'final'];
+            $currentIndex = array_search($currentPhase, $phaseOrder);
+            
+            // Check if all checklist items for current phase are completed
+            $stmt = db()->prepare("SELECT COUNT(*) as total, SUM(completed) as completed FROM project_checklist WHERE project_id = ? AND phase_name = ?");
+            $stmt->execute([$id, $currentPhase]);
+            $checklistStatus = $stmt->fetch();
+            
+            if ($checklistStatus['total'] > 0 && $checklistStatus['completed'] < $checklistStatus['total']) {
+                $error = 'Nisu svi zadaci u trenutnoj fazi završeni. Molimo završite sve zadatke prije prelaska na sljedeću fazu.';
+            } else {
+                // Move to next phase
+                if ($currentIndex !== false && $currentIndex < count($phaseOrder) - 1) {
+                    $nextPhase = $phaseOrder[$currentIndex + 1];
+                    
+                    // Mark current phase and ALL previous phases as completed
+                    for ($i = 0; $i <= $currentIndex; $i++) {
+                        $phaseToComplete = $phaseOrder[$i];
+                        $stmt = db()->prepare("UPDATE project_phases SET completed = 1, completed_at = NOW() WHERE project_id = ? AND phase_name = ?");
+                        $stmt->execute([$id, $phaseToComplete]);
+                    }
+                    
+                    // Update project to next phase
+                    $stmt = db()->prepare("UPDATE projects SET current_phase = ? WHERE id = ?");
+                    $stmt->execute([$nextPhase, $id]);
+                    
+                    // Set start date and time for next phase to NOW() in CET when advancing (log the exact time)
+                    $timezone = new DateTimeZone('Europe/Zagreb'); // CET
+                    $now = new DateTime('now', $timezone);
+                    $nowDate = $now->format('Y-m-d');
+                    $nowDateTime = $now->format('Y-m-d H:i:s');
+                    
+                    // Update the phase with start date (date only) and log the exact datetime in completed_at
+                    $stmt = db()->prepare("UPDATE project_phases SET start_date = ?, completed_at = ? WHERE project_id = ? AND phase_name = ?");
+                    $stmt->execute([$nowDate, $nowDateTime, $id, $nextPhase]);
+                    
+                    // If next phase doesn't exist in project_phases, create it with current date
+                    $stmt = db()->prepare("SELECT id FROM project_phases WHERE project_id = ? AND phase_name = ?");
+                    $stmt->execute([$id, $nextPhase]);
+                    if (!$stmt->fetch()) {
+                        // Get the phase index for sort_order
+                        $nextPhaseIndex = array_search($nextPhase, $phaseOrder);
+                        $stmt = db()->prepare("INSERT INTO project_phases (project_id, phase_name, start_date, sort_order) VALUES (?, ?, ?, ?)");
+                        $stmt->execute([$id, $nextPhase, $nowDate, $nextPhaseIndex]);
+                    }
+                    
+                    // Get Croatian phase name for message
+                    $phaseNames = [
+                        'agreement' => 'Dogovor',
+                        'planning' => 'Planiranje',
+                        'design' => 'Dizajn',
+                        'development' => 'Razvoj',
+                        'content' => 'Sadržaj',
+                        'testing' => 'Testiranje',
+                        'final' => 'Finalizacija'
+                    ];
+                    $nextPhaseName = $phaseNames[$nextPhase] ?? ucfirst($nextPhase);
+                    $message = 'Projekt je prebačen na fazu: ' . $nextPhaseName;
+                } else {
+                    $error = 'Projekt je već u posljednjoj fazi.';
+                }
+            }
+        }
+    } catch (Exception $e) {
+        $error = 'Greška pri prelasku na sljedeću fazu: ' . $e->getMessage();
     }
 }
 
@@ -71,18 +161,38 @@ if (dbAvailable()) {
             
             // Calculate next phase start time
             $currentPhase = $project['current_phase'];
-            $phaseOrder = ['planning', 'design', 'development', 'content', 'testing', 'final'];
+            $phaseOrder = ['agreement', 'planning', 'design', 'development', 'content', 'testing', 'final'];
+            $phaseNames = [
+                'agreement' => 'Dogovor',
+                'planning' => 'Planiranje',
+                'design' => 'Dizajn',
+                'development' => 'Razvoj',
+                'content' => 'Sadržaj',
+                'testing' => 'Testiranje',
+                'final' => 'Finalizacija'
+            ];
             $currentIndex = array_search($currentPhase, $phaseOrder);
             
             if ($currentIndex !== false && $currentIndex < count($phaseOrder) - 1) {
                 $nextPhase = $phaseOrder[$currentIndex + 1];
+                // Calculate countdown based on CURRENT phase start date + duration days in CET
                 if (isset($project['phases'][$currentPhase])) {
                     $currentPhaseData = $project['phases'][$currentPhase];
-                    if ($currentPhaseData['start_date']) {
-                        $startDate = new DateTime($currentPhaseData['start_date']);
-                        $startDate->modify('+' . $currentPhaseData['duration_days'] . ' days');
+                    // Check if current phase has start_date and duration
+                    if (!empty($currentPhaseData['start_date']) && $currentPhaseData['duration_days'] > 0) {
+                        // Use CET timezone for calculations
+                        $timezone = new DateTimeZone('Europe/Zagreb'); // CET
+                        // Calculate: start_date + duration_days = when current phase ends (next phase should start)
+                        // Start from the beginning of the start date (00:00:00)
+                        $startDate = new DateTime($currentPhaseData['start_date'] . ' 00:00:00', $timezone);
+                        // Add the duration in days (this gives us the end date at 00:00:00)
+                        $startDate->modify('+' . (int)$currentPhaseData['duration_days'] . ' days');
+                        // Set to end of that day (23:59:59) in CET - this is when the current phase ends
+                        $startDate->setTime(23, 59, 59);
+                        // Format in ISO 8601 with timezone for JavaScript
                         $project['next_phase_start'] = $startDate->format('Y-m-d H:i:s');
-                        $project['next_phase_name'] = ucfirst($nextPhase);
+                        $project['next_phase_start_iso'] = $startDate->format('c'); // ISO 8601 with timezone
+                        $project['next_phase_name'] = $phaseNames[$nextPhase] ?? ucfirst($nextPhase);
                     }
                 }
             }
