@@ -13,8 +13,29 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Start Smart HR - Profesionalna izrada web stranica'; ?>">
-  <title><?php echo isset($pageTitle) ? $pageTitle . ' | Start Smart HR' : 'Start Smart HR'; ?></title>
+  
+  <!-- Primary Meta Tags -->
+  <meta name="description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Start Smart HR - Profesionalna izrada web stranica u Zagrebu. Moderan web dizajn, brza izrada, SEO optimizacija.'; ?>">
+  <meta name="keywords" content="Start Smart HR, web dizajn Zagreb, izrada web stranica, web development Hrvatska, SEO optimizacija, responzivni web dizajn">
+  <meta name="author" content="Start Smart HR">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://startsmarthr.eu/<?php echo basename($_SERVER['PHP_SELF']); ?>">
+  
+  <title><?php echo isset($pageTitle) ? $pageTitle . ' | Start Smart HR - Web Dizajn Zagreb' : 'Start Smart HR - Profesionalni Web Dizajn Zagreb'; ?></title>
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://startsmarthr.eu/<?php echo basename($_SERVER['PHP_SELF']); ?>">
+  <meta property="og:title" content="<?php echo isset($pageTitle) ? $pageTitle . ' | Start Smart HR' : 'Start Smart HR'; ?>">
+  <meta property="og:description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Start Smart HR - Profesionalna izrada web stranica u Zagrebu.'; ?>">
+  <meta property="og:image" content="https://startsmarthr.eu/images/first.png">
+  <meta property="og:site_name" content="Start Smart HR">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="<?php echo isset($pageTitle) ? $pageTitle . ' | Start Smart HR' : 'Start Smart HR'; ?>">
+  <meta property="twitter:description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Start Smart HR - Profesionalna izrada web stranica u Zagrebu.'; ?>">
+  <meta property="twitter:image" content="https://startsmarthr.eu/images/first.png">
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="images/SSHR.png">
@@ -29,6 +50,9 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
   
   <!-- Cloudflare Turnstile -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  
+  <!-- Analytics -->
+  <?php require_once __DIR__ . '/analytics-loader.php'; ?>
 </head>
 <body>
   <!-- Navigation -->

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /config/
+Disallow: /cache/
+Disallow: /includes/
+Disallow: /install/
+
+Sitemap: https://startsmarthr.eu/sitemap.xml
+

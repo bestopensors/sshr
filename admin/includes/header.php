@@ -65,6 +65,15 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                     Poruke
                 </a>
                 
+                <a href="analytics.php" class="sidebar__link <?php echo $currentPage === 'analytics' ? 'active' : ''; ?>">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    Analitika
+                </a>
+                
                 <a href="settings.php" class="sidebar__link <?php echo $currentPage === 'settings' ? 'active' : ''; ?>">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>

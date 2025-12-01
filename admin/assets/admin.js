@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Auto-hide alerts after 5 seconds
-    const alerts = document.querySelectorAll('.alert');
+    // Auto-hide alerts after 5 seconds (except status alerts)
+    const alerts = document.querySelectorAll('.alert:not(#umami-status-alert)');
     alerts.forEach(function(alert) {
         setTimeout(function() {
             alert.style.opacity = '0';

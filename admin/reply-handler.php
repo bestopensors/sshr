@@ -225,13 +225,12 @@ try {
                             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
                                 <div style="text-align: center; margin-bottom: 20px;">
                                     <h3 style="margin: 0 0 10px 0; color: #6366f1; font-size: 18px;">Start Smart HR</h3>
-                                    <p style="margin: 0; color: #6b7280; font-size: 12px;">Start Smart, zajednički obrt za izradu i optimizaciju web stranica</p>
-                                    <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 12px;">vl. Mihael Kovačić i Roko Nevistić</p>
+                                    <p style="margin: 0; color: #6b7280; font-size: 12px;">Start Smart, zajednički obrt za izradu i optimizaciju web stranica, vl. Mihael Kovačić i Roko Nevistić</p>
                                 </div>
                                 <div style="text-align: center; margin-bottom: 15px;">
-                                    <p style="margin: 5px 0; color: #374151; font-size: 13px;"><strong>Email:</strong> <a href="mailto:info@startsmarthr.eu" style="color: #6366f1; text-decoration: none;">info@startsmarthr.eu</a></p>
+                                    <p style="margin: 5px 0; color: #374151; font-size: 13px;"><strong>Email:</strong> <a href="mailto:contact@startsmarthr.eu" style="color: #6366f1; text-decoration: none;">contact@startsmarthr.eu</a></p>
                                     <p style="margin: 5px 0; color: #374151; font-size: 13px;"><strong>Telefon:</strong> <a href="tel:+385996105673" style="color: #6366f1; text-decoration: none;">+385 99 610 5673</a> | <a href="tel:+385958374220" style="color: #6366f1; text-decoration: none;">+385 95 837 4220</a></p>
-                                    <p style="margin: 5px 0; color: #374151; font-size: 13px;"><strong>Adresa:</strong> Zagreb, Hrvatska</p>
+                                    <p style="margin: 5px 0; color: #374151; font-size: 13px;"><strong>Adresa:</strong> Seljine Brigade 72, Velika Gorica, Hrvatska</p>
                                 </div>
                                 <div style="text-align: center;">
                                     <div style="display: inline-block;">
