@@ -19,7 +19,10 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
   <meta name="keywords" content="Start Smart HR, web dizajn Zagreb, izrada web stranica, web development Hrvatska, SEO optimizacija, responzivni web dizajn">
   <meta name="author" content="Start Smart HR">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://startsmarthr.eu/<?php echo basename($_SERVER['PHP_SELF']); ?>">
+  <link rel="canonical" href="https://startsmarthr.eu/<?php 
+    $currentFile = basename($_SERVER['PHP_SELF']);
+    echo ($currentFile === 'index.php') ? '' : $currentFile;
+  ?>">
   
   <title><?php echo isset($pageTitle) ? $pageTitle . ' | Start Smart HR - Web Dizajn Zagreb' : 'Start Smart HR - Profesionalni Web Dizajn Zagreb'; ?></title>
   

@@ -26,8 +26,24 @@ $validPages = [
     '/404.php' => '/404.php',
 ];
 
+// Handle sitemap.xml via PHP handler
+if ($path === '/sitemap.xml') {
+    include __DIR__ . '/sitemap.php';
+    return true;
+}
+
+// Handle robots.txt explicitly
+if ($path === '/robots.txt') {
+    $filePath = __DIR__ . $path;
+    if (file_exists($filePath)) {
+        header('Content-Type: text/plain; charset=utf-8');
+        readfile($filePath);
+        return true;
+    }
+}
+
 // Check for static files (css, js, images, etc.)
-$staticExtensions = ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf', 'eot'];
+$staticExtensions = ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf', 'eot', 'xml', 'txt'];
 $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
 if (in_array($ext, $staticExtensions)) {

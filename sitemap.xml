@@ -10,22 +10,28 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://startsmarthr.eu/?lang=en" />
   </url>
   <url>
-    <loc>https://startsmarthr.eu/about.html</loc>
+    <loc>https://startsmarthr.eu/about.php</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://startsmarthr.eu/about.php" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://startsmarthr.eu/about.php?lang=en" />
   </url>
   <url>
-    <loc>https://startsmarthr.eu/privacy.html</loc>
+    <loc>https://startsmarthr.eu/privacy.php</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://startsmarthr.eu/privacy.php" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://startsmarthr.eu/privacy.php?lang=en" />
   </url>
   <url>
-    <loc>https://startsmarthr.eu/terms.html</loc>
+    <loc>https://startsmarthr.eu/terms.php</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://startsmarthr.eu/terms.php" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://startsmarthr.eu/terms.php?lang=en" />
   </url>
 </urlset>
 

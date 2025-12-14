@@ -115,8 +115,7 @@ if (dbAvailable()) {
     "areaServed": {
       "@type": "Country",
       "name": "Croatia"
-    },
-    "serviceType": "Web Design and Development"
+    }
   }
   </script>
   
@@ -483,7 +482,7 @@ if (dbAvailable()) {
         </div>
       </div>
       
-      <div class="packages__custom-notice" style="text-align: center; color: #00ff00; font-size: 1rem; font-weight: bold; margin: 3rem 0; padding: 1.5rem; line-height: 1.3;">
+      <div class="packages__custom-notice" style="text-align: center; color: var(--color-text-secondary); font-size: 1rem; font-weight: bold; margin: 3rem 0; padding: 1.5rem; line-height: 1.3;">
         <span data-lang-hr>Ne gradimo web stranice s WordPress-om, Wix-om, Squarespace-om... Gradimo prilagođena rješenja koja su napisana od nule prilagođena vašim specifičnim potrebama</span>
         <span data-lang-en style="display:none;">We do not build websites with WordPress, Wix, Squarespace... We build custom solutions which are written from scratch tailored to your specific needs</span>
       </div>
