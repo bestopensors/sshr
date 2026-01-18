@@ -20,9 +20,22 @@ CREATE TABLE `admins` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Insert default admin (password: admin123)
-INSERT INTO `admins` (`username`, `password`, `email`, `active`) VALUES
-('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@startsmarthr.eu', 1);
+-- Create admin accounts via the app or insert them manually.
+
+-- ----------------------------
+-- Table: admin_login_attempts
+-- ----------------------------
+DROP TABLE IF EXISTS `admin_login_attempts`;
+CREATE TABLE `admin_login_attempts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip_address` varchar(45) NOT NULL,
+  `fail_count` int(11) NOT NULL DEFAULT 0,
+  `last_failed` datetime DEFAULT NULL,
+  `banned_until` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ip_address` (`ip_address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table: settings

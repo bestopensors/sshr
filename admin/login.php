@@ -12,19 +12,35 @@ if (isLoggedIn()) {
 }
 
 $error = '';
+$ip = getClientIp();
+$isBanned = isIpBanned($ip);
+$remainingAttempts = getRemainingLoginAttempts($ip);
 
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = sanitize($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    
-    if (empty($username) || empty($password)) {
-        $error = 'Molimo unesite korisničko ime i lozinku.';
-    } elseif (attemptLogin($username, $password)) {
-        header('Location: index.php');
-        exit;
+    if (!dbAvailable()) {
+        $error = 'Prijava nije dostupna jer baza podataka nije povezana.';
+    } elseif ($isBanned) {
+        $error = 'Previše neuspješnih pokušaja. Pokušajte ponovno kasnije.';
     } else {
-        $error = 'Pogrešno korisničko ime ili lozinka.';
+        $username = sanitize($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if (empty($username) || empty($password)) {
+            $error = 'Molimo unesite korisničko ime i lozinku.';
+        } elseif (attemptLogin($username, $password)) {
+            header('Location: index.php');
+            exit;
+        } else {
+            $isBanned = isIpBanned($ip);
+            $remainingAttempts = getRemainingLoginAttempts($ip);
+            if ($isBanned) {
+                $error = 'Previše neuspješnih pokušaja. Pokušajte ponovno kasnije.';
+            } else {
+                $suffix = $remainingAttempts === 1 ? 'Preostao je 1 pokušaj.' : 'Preostalo je ' . $remainingAttempts . ' pokušaja.';
+                $error = 'Pogrešno korisničko ime ili lozinka. ' . $suffix;
+            }
+        }
     }
 }
 ?>
@@ -111,6 +127,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-color: #6366f1;
             background: rgba(255, 255, 255, 0.1);
         }
+
+        .form-group input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         
         .form-group input::placeholder {
             color: rgba(255, 255, 255, 0.4);
@@ -132,6 +153,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         .error-message {
@@ -174,15 +202,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" action="">
             <div class="form-group">
                 <label for="username">Korisničko ime</label>
-                <input type="text" id="username" name="username" placeholder="Unesite korisničko ime" required autofocus>
+                <input type="text" id="username" name="username" placeholder="Unesite korisničko ime" required autofocus <?php echo ($isBanned || !dbAvailable()) ? 'disabled' : ''; ?>>
             </div>
             
             <div class="form-group">
                 <label for="password">Lozinka</label>
-                <input type="password" id="password" name="password" placeholder="Unesite lozinku" required>
+                <input type="password" id="password" name="password" placeholder="Unesite lozinku" required <?php echo ($isBanned || !dbAvailable()) ? 'disabled' : ''; ?>>
             </div>
             
-            <button type="submit" class="btn-login">Prijava</button>
+            <button type="submit" class="btn-login" <?php echo ($isBanned || !dbAvailable()) ? 'disabled' : ''; ?>>Prijava</button>
         </form>
         
         <a href="../index.php" class="back-link">← Povratak na stranicu</a>
