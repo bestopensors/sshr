@@ -15,9 +15,11 @@
     --bg-dark: #0f172a;
     --bg-card: #1e293b;
     --bg-input: #334155;
+    --bg-secondary: #1e293b;
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --border: #334155;
+    --border-color: #334155;
     --sidebar-width: 260px;
 }
 
